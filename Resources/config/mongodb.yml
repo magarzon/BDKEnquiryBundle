@@ -1,0 +1,6 @@
+services:
+
+    bdk.enquiry.object_manager:
+        class: Doctrine\ODM\MongoDB\DocumentManager
+        factory_service: doctrine_mongodb
+        factory_method: getManager

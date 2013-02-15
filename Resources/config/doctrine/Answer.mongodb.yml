@@ -1,0 +1,18 @@
+Bodaclick\BDKEnquiryBundle\Document\Answer:
+  collection: answers
+  fields:
+    id:
+      id: true
+
+  emnbedMany:
+    responses:
+      targetDocument: Response
+
+  referenceOne:
+    enquiry:
+      targetDocument: Enquiry
+      inversedBy: answers
+      simple: true
+
+  referenceOne:
+    user: ~

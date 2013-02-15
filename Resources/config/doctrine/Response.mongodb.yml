@@ -1,0 +1,8 @@
+Bodaclick\BDKEnquiryBundle\Document\Response:
+  fields:
+    key:
+      type: string
+    type:
+      type: string
+    value:
+      type: string
