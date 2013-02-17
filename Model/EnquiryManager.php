@@ -85,7 +85,7 @@ class EnquiryManager
      *
      * @return Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface The enquiry database object created
      */
-    public function createEnquiry($about,$form=null, $name = null)
+    public function saveEnquiry($about,$form=null, $name = null)
     {
 
         if (!is_object($about))
@@ -152,7 +152,7 @@ class EnquiryManager
      * @param Bodaclick\BDKEnquiryBundle\Model\Answer $answer An answer object containing the responses given
      * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to. If none specified, the connected one is used.
      */
-    public function answerEnquiry($enquiry,Answer $answer, UserInterface $user = null)
+    public function saveAnswer($enquiry,Answer $answer, UserInterface $user = null)
     {
 
         //Get the actual database enquiry object, if name is specified in the param
