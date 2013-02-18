@@ -22,10 +22,12 @@ class EnquiryRepository extends EntityRepository implements EnquiryRepositoryInt
     {
         //Generate the definition and find using the string generated
         $metadata = $this->getClassMetadata($object);
-        $definition = Enquiry::generateAboutDefinition($metadata->getName(),$metadata->getIdentifierValues($object));
+        $className = $metadata->getName();
+        $ids = $metadata->getIdentifierValues($object);
+        $definition = json_encode(compact("className","ids"));
 
         $qb=$this->createQueryBuilder('e')
-            ->where('aboutDefinition = :definition')
+            ->where('about = :definition')
             ->setParameter('definition',$definition);
 
 

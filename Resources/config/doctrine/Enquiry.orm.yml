@@ -5,7 +5,7 @@ Bodaclick\BDKEnquiryBundle\Entity\Enquiry:
     name_index:
       columns: [name]
     about_index:
-      columns: [aboutDefinition]
+      columns: [about]
   fields:
     id:
       type: integer
@@ -21,7 +21,7 @@ Bodaclick\BDKEnquiryBundle\Entity\Enquiry:
       type: string
       length: 255
       nullable: true
-    aboutDefinition:
+    about:
       type: string
       length: 255
 

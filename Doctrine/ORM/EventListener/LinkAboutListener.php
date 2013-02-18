@@ -8,8 +8,10 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 
 /**
  * Doctrine ORM Listener to manage the relationship between the enquiry and the about object in ORM
- * The about object is of an unknown class, so we "serialize" it in a special field call aboutDefinition
- * when the enquiry object is persisted, and it's "deserialized" when an enquiry object is loaded from the database.
+ * The about object is of an unknown class, so we save a definition (className and id) in JSON Format
+ * when the enquiry object is persisted, and convert again in the actual object when an enquiry object
+ * is loaded from the database or after persisted in the database (so getAbout always return an object
+ * and not a definition
  */
 class LinkAboutListener
 {
@@ -22,21 +24,40 @@ class LinkAboutListener
 
             //The class metadata is used to get the identifiers, that could be compound
             $metadata = $event->getEntityManager()->getClassMetadata(get_class($about));
-            $enquiry->setAboutDefinition($metadata->getName(),$metadata->getIdentifierValues($about));
+            $className = $metadata->getName();
+            $ids = $metadata->getIdentifierValues($about);
+
+            //And used to generate a definition/semi-serialization of the about object in JSON format
+            $definition = json_encode(compact("className","ids"));
+
+            //Change the about object by its definition
+            $enquiry->setAbout($definition);
 
         }
     }
 
     public function postLoad(LifecycleEventArgs $event)
     {
+        $this->regenerateAboutField($event);
+    }
+
+    public function postPersist(LifecycleEventArgs $event)
+    {
+        $this->regenerateAboutField($event);
+    }
+
+    protected function regenerateAboutField(LifecycleEventArgs $event)
+    {
         if ($event->getEntity() instanceof \Bodaclick\BDKEnquiryBundle\Entity\Enquiry)
         {
             $enquiry = $event->getEntity();
-            $definition = $enquiry->getAboutDefinition();
+            $definition = $enquiry->getAbout();
 
-            //The geAboutDefinition method returns an array with the names of the variables and their value
+            $object = json_decode($definition,true);
+
+            //The definition consist in an array with the names of the variables and their value in JSON format
             //The php extract method is used to "make" that variables, $className and $ids
-            extract($definition);
+            extract(json_decode($definition,true));
 
             //Only a reference (proxy) to the about object is set, so no query to the database is needed
             //until one of the about object's field is accessed.
@@ -45,4 +66,5 @@ class LinkAboutListener
             $enquiry->setAbout($about);
         }
     }
+
 }
