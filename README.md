@@ -1,7 +1,9 @@
 BDKEnquiryBundle
 ================
 
-[![Build Status](https://travis-ci.org/Bodaclick/BDKEnquiryBundle.png?branch=master)](https://travis-ci.org/Bodaclick/BDKEnquiryBundle)
+Builds Statuses:
+Dev Branch: [![Build Status](https://travis-ci.org/Bodaclick/BDKEnquiryBundle.png?branch=de)](https://travis-ci.org/Bodaclick/BDKEnquiryBundle)
+Master Branch: [![Build Status](https://travis-ci.org/Bodaclick/BDKEnquiryBundle.png?branch=master)](https://travis-ci.org/Bodaclick/BDKEnquiryBundle)
 
 Work in Progress
 
