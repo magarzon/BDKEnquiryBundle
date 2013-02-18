@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 interface EnquiryInterface
@@ -11,4 +10,3 @@ interface EnquiryInterface
 
     public function getAbout();
 }
-

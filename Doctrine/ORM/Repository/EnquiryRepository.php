@@ -3,7 +3,6 @@
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use Bodaclick\BDKEnquiryBundle\Entity\Enquiry;
 use Bodaclick\BDKEnquiryBundle\Model\EnquiryRepositoryInterface;
 
 /**
@@ -24,11 +23,11 @@ class EnquiryRepository extends EntityRepository implements EnquiryRepositoryInt
         $metadata = $this->getClassMetadata($object);
         $className = $metadata->getName();
         $ids = $metadata->getIdentifierValues($object);
-        $definition = json_encode(compact("className","ids"));
+        $definition = json_encode(compact("className", "ids"));
 
         $qb=$this->createQueryBuilder('e')
             ->where('about = :definition')
-            ->setParameter('definition',$definition);
+            ->setParameter('definition', $definition);
 
 
         return $qb->getQuery()->execute();

@@ -2,7 +2,6 @@
 
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
-
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
@@ -78,27 +77,24 @@ class EnquiryManager
      *
      * @return Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface The enquiry database object created
      */
-    public function saveEnquiry($about,$form=null, $name = null)
+    public function saveEnquiry($about, $form=null, $name = null)
     {
 
-        if (!is_object($about))
+        if (!is_object($about)) {
             throw new \InvalidArgumentException('The about parameter must be an object and cannot be null');
+        }
 
         //Check if the "about" object is persisted (has an identifier value),
         //if not, persist it to get the right id when associated with enquiry
-        try
-        {
+        try {
             $aboutMetadata = $this->objectManager->getClassMetadata(get_class($about));
-        }
-        catch(\Exception $e)
-        {
+        } catch(\Exception $e) {
             throw new \InvalidArgumentException('The about parameter must be a valid entity or a valid document');
         }
 
         $ids = $aboutMetadata->getIdentifierValues($about);
 
-        if (count($ids)==0)
-        {
+        if (count($ids)==0) {
             $this->objectManager->persist($about);
             $this->objectManager->flush();
         }
@@ -119,13 +115,13 @@ class EnquiryManager
 
 
         return $enquiry;
-
     }
 
     /**
      * Delete an enquiry from the database by name or specifying the object itself
      *
-     * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry that is going to be deleted
+     * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry
+     * object or the name of the enquiry that is going to be deleted
      */
     public function deleteEnquiry($enquiry)
     {
@@ -134,7 +130,6 @@ class EnquiryManager
 
         $this->objectManager->remove($enquiry);
         $this->objectManager->flush();
-
     }
 
     /**
@@ -145,7 +140,7 @@ class EnquiryManager
      * @param Bodaclick\BDKEnquiryBundle\Model\Answer $answer An answer object containing the responses given
      * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to.
      */
-    public function saveAnswer($enquiry,Answer $answer, UserInterface $user)
+    public function saveAnswer($enquiry, Answer $answer, UserInterface $user)
     {
 
         //Get the actual database enquiry object, if name is specified in the param
@@ -159,7 +154,6 @@ class EnquiryManager
         //Save to the database
         $this->objectManager->persist($enquiry);
         $this->objectManager->flush();
-
     }
 
     /**
@@ -192,7 +186,8 @@ class EnquiryManager
      * Helper function used to check the enquiry param in some methods
      * If it's a string, guess it's the enquiry name, if not, the enquiry object itself
      *
-     * @param string | Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface $enquiry The enquiry object or the enquiry's name
+     * @param string | Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface $enquiry
+     *          The enquiry object or the enquiry's name
      * @return Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface
      *
      * @throws \InvalidArgumentException
@@ -200,15 +195,20 @@ class EnquiryManager
     protected function resolveEnquiryParam($enquiry)
     {
 
-        if (is_string($enquiry))
-        {
+        if (is_string($enquiry)) {
             $name = $enquiry;
-            $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->findOneBy(array('name'=>$name));
-            if ($enquiry===null)
-                throw new \InvalidArgumentException(sprintf("There isn't any enquiry in the database with the name %s",$name));
-        }
-        elseif (!($enquiry instanceof EnquiryInterface))
-            throw new \InvalidArgumentException(sprintf("The method param must be an object implementing EnquiryInterface or a string containing the name of an enquiry"));
+            $enquiry = $this->objectManager
+                ->getRepository('BDKEnquiryBundle:Enquiry')->findOneBy(array('name'=>$name));
+            if ($enquiry===null) {
+                throw new \InvalidArgumentException(
+                    sprintf("There isn't any enquiry in the database with the name %s", $name)
+                );
+            }
+        } elseif (!($enquiry instanceof EnquiryInterface))
+            throw new \InvalidArgumentException(
+                sprintf("The method param must be an object implementing EnquiryInterface
+                    or a string containing the name of an enquiry")
+            );
 
         return $enquiry;
     }

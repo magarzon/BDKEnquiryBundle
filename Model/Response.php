@@ -2,8 +2,6 @@
 
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
-use Symfony\Component\Security\Core\User\UserInterface;
-
 abstract class Response
 {
     /**

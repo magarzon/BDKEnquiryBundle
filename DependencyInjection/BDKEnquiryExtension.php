@@ -21,7 +21,7 @@ class BDKEnquiryExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         //The bdk.user_class parameter gives the user class used in the system. Is required
-        $container->setParameter('bdk.user_class',$config['user_class']);
+        $container->setParameter('bdk.user_class', $config['user_class']);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
 
@@ -30,6 +30,5 @@ class BDKEnquiryExtension extends Extension
 
         //Load the common services
         $loader->load('services.yml');
-
     }
 }

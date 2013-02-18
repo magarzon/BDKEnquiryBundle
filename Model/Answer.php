@@ -118,8 +118,4 @@ abstract class Answer
     {
         $this->responses->add($response);
     }
-
-
-
-
 }

@@ -2,7 +2,6 @@
 
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener;
 
-
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
@@ -17,8 +16,7 @@ class LinkAboutListener
 {
     public function prePersist(LifecycleEventArgs $event)
     {
-        if ($event->getEntity() instanceof \Bodaclick\BDKEnquiryBundle\Entity\Enquiry)
-        {
+        if ($event->getEntity() instanceof \Bodaclick\BDKEnquiryBundle\Entity\Enquiry) {
             $enquiry = $event->getEntity();
             $about = $enquiry->getAbout();
 
@@ -28,11 +26,10 @@ class LinkAboutListener
             $ids = $metadata->getIdentifierValues($about);
 
             //And used to generate a definition/semi-serialization of the about object in JSON format
-            $definition = json_encode(compact("className","ids"));
+            $definition = json_encode(compact("className", "ids"));
 
             //Change the about object by its definition
             $enquiry->setAbout($definition);
-
         }
     }
 
@@ -48,23 +45,21 @@ class LinkAboutListener
 
     protected function regenerateAboutField(LifecycleEventArgs $event)
     {
-        if ($event->getEntity() instanceof \Bodaclick\BDKEnquiryBundle\Entity\Enquiry)
-        {
+        if ($event->getEntity() instanceof \Bodaclick\BDKEnquiryBundle\Entity\Enquiry) {
             $enquiry = $event->getEntity();
             $definition = $enquiry->getAbout();
 
-            $object = json_decode($definition,true);
+            $object = json_decode($definition, true);
 
             //The definition consist in an array with the names of the variables and their value in JSON format
             //The php extract method is used to "make" that variables, $className and $ids
-            extract(json_decode($definition,true));
+            extract(json_decode($definition, true));
 
             //Only a reference (proxy) to the about object is set, so no query to the database is needed
             //until one of the about object's field is accessed.
-            $about=$event->getEntityManager()->getReference($className,$ids);
+            $about=$event->getEntityManager()->getReference($className, $ids);
 
             $enquiry->setAbout($about);
         }
     }
-
 }

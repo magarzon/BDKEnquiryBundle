@@ -51,6 +51,4 @@ class Response extends BaseResponse
     {
         return $this->answer;
     }
-
-
 }

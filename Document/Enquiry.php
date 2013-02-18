@@ -10,4 +10,3 @@ use Bodaclick\BDKEnquiryBundle\Model\Enquiry as BaseEnquiry;
 class Enquiry extends BaseEnquiry
 {
 }
-

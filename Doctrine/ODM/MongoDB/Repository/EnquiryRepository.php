@@ -3,7 +3,6 @@
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\Repository;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
-use Bodaclick\BDKEnquiryBundle\Entity\Enquiry;
 use Bodaclick\BDKEnquiryBundle\Model\EnquiryRepositoryInterface;
 
 /**
@@ -15,7 +14,8 @@ class EnquiryRepository extends DocumentRepository implements EnquiryRepositoryI
      * Gets all the enquiries associated with an object
      *
      * @param mixed $object
-     * @return array|bool|\Doctrine\MongoDB\ArrayIterator|\Doctrine\MongoDB\Cursor|\Doctrine\MongoDB\EagerCursor|int|mixed|\MongoCursor|null
+     * @return array|bool|\Doctrine\MongoDB\ArrayIterator|\Doctrine\MongoDB\Cursor|
+     *          \Doctrine\MongoDB\EagerCursor|int|mixed|\MongoCursor|null
      */
     public function getEnquiriesFor($object)
     {

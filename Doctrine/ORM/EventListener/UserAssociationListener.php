@@ -2,7 +2,6 @@
 
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener;
 
-
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\Mapping\Builder\ClassMetadataBuilder;
@@ -30,12 +29,13 @@ class UserAssociationListener
     {
         $classMetadata = $args->getClassMetadata();
 
-        if ($classMetadata->getName()!=='Bodaclick\BDKEnquiryBundle\Entity\Answer')
+        if ($classMetadata->getName()!=='Bodaclick\BDKEnquiryBundle\Entity\Answer') {
             return;
+        }
 
         //Setting the one to one relationship
         $builder = new ClassMetadataBuilder($args->getClassMetadata());
 
-        $builder->addOwningOneToOne('user',$this->userClassname);
+        $builder->addOwningOneToOne('user', $this->userClassname);
     }
 }
