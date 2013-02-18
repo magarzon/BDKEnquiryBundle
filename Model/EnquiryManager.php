@@ -12,12 +12,6 @@ use Doctrine\Common\Persistence\ObjectManager;
  */
 class EnquiryManager
 {
-    /**
-     * Security Context. Used to get the connected user if none is provided
-     *
-     * @var
-     */
-    protected $securityContext;
 
     /**
      * ObjectManager to access the database, by ORM or ODM
@@ -32,9 +26,8 @@ class EnquiryManager
      * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
      * @param $securityContext
      */
-    public function __construct(ObjectManager $objectManager,$securityContext)
+    public function __construct(ObjectManager $objectManager)
     {
-        $this->securityContext = $securityContext;
         $this->objectManager = $objectManager;
     }
 
@@ -150,9 +143,9 @@ class EnquiryManager
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
      * @param Bodaclick\BDKEnquiryBundle\Model\Answer $answer An answer object containing the responses given
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to. If none specified, the connected one is used.
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to.
      */
-    public function saveAnswer($enquiry,Answer $answer, UserInterface $user = null)
+    public function saveAnswer($enquiry,Answer $answer, UserInterface $user)
     {
 
         //Get the actual database enquiry object, if name is specified in the param
@@ -161,18 +154,7 @@ class EnquiryManager
         //Associate the answers
         $enquiry->addAnswer($answer);
 
-        //Associate the user, if none given, get the connected one
-        if ($answer->getUser()==null)
-        {
-            if ($user==null)
-            {
-                $token=$this->securityContext->getToken();
-                if ($token!=null)
-                    $user=$token->getUser();
-            }
-
-            if ($user) $answer->setUser($user);
-        }
+        $answer->setUser($user);
 
         //Save to the database
         $this->objectManager->persist($enquiry);
