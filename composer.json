@@ -1,0 +1,17 @@
+{
+    "name": "bodaclick/bdk-enquiry-bundle",
+    "type": "symfony-bundle",
+    "description": "Bundle to handle enquiries and their answers",
+    "keywords": ["enquiry"],
+    "homepage": "http://bodaclick.github.com",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.3.2",
+        "symfony/framework-bundle": ">=2.1,<2.3-dev"
+    },
+    "autoload": {
+        "psr-0": { "Bodaclick\\BDKEnquiryBundle": "" }
+    },
+    "target-dir": "Bodaclick/BDKEnquiryBundle"
+}
