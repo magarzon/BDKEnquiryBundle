@@ -1,7 +1,7 @@
 services:
     bdk.enquiry.manager:
         class: Bodaclick\BDKEnquiryBundle\Model\EnquiryManager
-        arguments: [ @bdk.enquiry.object_manager, @security.context]
+        arguments: [ @bdk.enquiry.object_manager]
 
     bdk.enquiry.service:
         alias: bdk.enquiry.manager
