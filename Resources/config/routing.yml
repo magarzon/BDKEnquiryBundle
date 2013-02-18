@@ -1,0 +1,3 @@
+bdk_enquiry_homepage:
+    pattern:  /hello/{name}
+    defaults: { _controller: BDKEnquiryBundle:Default:index }

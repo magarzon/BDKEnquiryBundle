@@ -1,0 +1,20 @@
+Bodaclick\BDKEnquiryBundle\Document\Enquiry:
+  collection: enquiries
+  fields:
+    id:
+      id: true
+    name:
+      type: string
+      unique: true
+      index: true
+      sparse: true
+    form:
+      type: string
+
+  referenceOne:
+    about: ~
+
+  referenceMany:
+    answers:
+      targetDocument: Answer
+      mappedBy: enquiry
