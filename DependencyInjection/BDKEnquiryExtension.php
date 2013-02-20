@@ -42,16 +42,22 @@ class BDKEnquiryExtension extends Extension
         $responseClasses = $config['responses']['mapping'];
         $inheritanceType = $config['responses']['inheritance'];
 
-        //Set the listener that configure the response mapping, depending on configuration
-        $def = $container->getDefinition('bdk.response_mapping.listener');
+        $defaultResponses = $container->getParameter('bdk.response_mapping');
 
-        $def->addArgument($responseClasses);
+        //Only enable the listeners for mapping Response classes if there are more than one
+        if (count($defaultResponses) > 1 || !empty($responseClasses)) {
 
-        if ($config['db_driver']=='orm') {
-                $def->addArgument($inheritanceType);
-                $def->addTag('doctrine.event_listener', array('event'=>'loadClassMetadata'));
-        } else {
-            $def->addTag('doctrine_mongodb.odm.event_listener', array('event'=>'loadClassMetadata'));
+            //Set the listener that configure the response mapping, depending on configuration
+            $def = $container->getDefinition('bdk.response_mapping.listener');
+
+            $def->addArgument($responseClasses);
+
+            if ($config['db_driver']=='orm') {
+                    $def->addArgument($inheritanceType);
+                    $def->addTag('doctrine.event_listener', array('event'=>'loadClassMetadata'));
+            } else {
+                $def->addTag('doctrine_mongodb.odm.event_listener', array('event'=>'loadClassMetadata'));
+            }
         }
 
 
