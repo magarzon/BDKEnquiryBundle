@@ -15,6 +15,10 @@ services:
         arguments: [ %bdk.response_mapping%]
         public: false
 
+    bdk.db_prefix.listener:
+        class: Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener\TableNamePrefixListener
+        public: false
+
     bdk.link_about.listener:
         class: Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener\LinkAboutListener
         public: false

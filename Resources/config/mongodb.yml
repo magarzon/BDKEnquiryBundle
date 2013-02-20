@@ -13,3 +13,7 @@ services:
         class: Bodaclick\BDKEnquiryBundle\Doctrine\ODM\MongoDB\EventListener\ResponseMappingListener
         arguments: [%bdk.response_mapping%]
         public: false
+
+    bdk.db_prefix.listener:
+        class: Bodaclick\BDKEnquiryBundle\Doctrine\ODM\MongoDB\EventListener\CollectionNamePrefixListener
+        public: false

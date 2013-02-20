@@ -36,7 +36,7 @@ class ResponseMappingListener
     /**
      * Method called when event loadClassMetadata is launched
      *
-     * @param \Doctrine\ORM\Event\LoadClassMetadataEventArgs $args
+     * @param Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs $args
      */
     public function loadClassMetadata(LoadClassMetadataEventArgs $args)
     {
