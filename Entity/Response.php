@@ -44,7 +44,7 @@ class Response extends BaseResponse
      * @param Answer $answer
      * @return Response
      */
-    public function setAnswer($answer)
+    public function setAnswer(Answer $answer)
     {
         $this->answer = $answer;
         return $this;

@@ -12,6 +12,7 @@
 namespace Bodaclick\BDKEnquiryBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
@@ -36,6 +37,23 @@ class BDKEnquiryExtension extends Extension
 
         //Load configuration for the db_driver given
         $loader->load(sprintf('%s.yml', $config['db_driver']));
+
+        //Load mapping of subclasses of Response
+        $responseClasses = $config['responses']['mapping'];
+        $inheritanceType = $config['responses']['inheritance'];
+
+        //Set the listener that configure the response mapping, depending on configuration
+        $def = $container->getDefinition('bdk.response_mapping.listener');
+
+        $def->addArgument($responseClasses);
+
+        if ($config['db_driver']=='orm') {
+                $def->addArgument($inheritanceType);
+                $def->addTag('doctrine.event_listener', array('event'=>'loadClassMetadata'));
+        } else {
+            $def->addTag('doctrine_mongodb.odm.event_listener', array('event'=>'loadClassMetadata'));
+        }
+
 
         //Load the common services
         $loader->load('services.yml');

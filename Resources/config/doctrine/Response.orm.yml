@@ -7,15 +7,10 @@ Bodaclick\BDKEnquiryBundle\Entity\Response:
       id: true
       generator:
         strategy: AUTO
-
     key:
       type: string
       length: 255
       column: rkey
-    type:
-      type: string
-      column: rtype
-      length: 255
     value:
       type: string
       column: rvalue

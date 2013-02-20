@@ -1,15 +1,22 @@
 Bodaclick\BDKEnquiryBundle\Document\Enquiry:
+  type: document
   collection: enquiries
   fields:
     id:
       id: true
     name:
       type: string
-      unique: true
-      index: true
-      sparse: true
     form:
       type: string
+
+  indexes:
+    name:
+      keys:
+        name: asc
+      options:
+        unique: true
+        safe: true
+        sparse: true
 
   referenceOne:
     about: ~

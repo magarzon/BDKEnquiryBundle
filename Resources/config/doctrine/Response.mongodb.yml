@@ -1,8 +1,7 @@
 Bodaclick\BDKEnquiryBundle\Document\Response:
+  type: embeddedDocument
   fields:
     key:
-      type: string
-    type:
       type: string
     value:
       type: string
