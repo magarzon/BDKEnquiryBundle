@@ -68,8 +68,9 @@ class BDKEnquiryExtension extends Extension
     {
         $def = $container->getDefinition($id);
 
-        foreach($arguments as $argument)
+        foreach($arguments as $argument) {
             $def->addArgument($argument);
+        }
 
         if ($driver=='orm') {
             $def->addTag('doctrine.event_listener', array('event'=>'loadClassMetadata'));
