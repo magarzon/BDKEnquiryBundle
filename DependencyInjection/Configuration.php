@@ -30,18 +30,42 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('bdk_enquiry');
 
         $supportedDrivers = array('orm', 'mongodb');
+        $supportedInheritanceTypes = array('single','joined');
 
         $rootNode->children()
             ->scalarNode('db_driver')
-            ->validate()
-            ->ifNotInArray($supportedDrivers)
-            ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode($supportedDrivers))
+                ->validate()
+                ->ifNotInArray($supportedDrivers)
+                    ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode($supportedDrivers))
+                ->end()
+                ->cannotBeOverwritten()
+                ->isRequired()
+                ->cannotBeEmpty()
             ->end()
-            ->cannotBeOverwritten()
-            ->isRequired()
-            ->cannotBeEmpty()
+            ->scalarNode('user_class')->isRequired()->cannotBeEmpty()->end()
+            ->arrayNode('responses')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->arrayNode('mapping')
+                        ->useAttributeAsKey('type')
+                        ->prototype('array')
+                            ->children()
+                                ->scalarNode('type')->end()
+                                ->scalarNode('class')->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                    ->scalarNode('inheritance')
+                        ->defaultValue('single')
+                        ->validate()
+                        ->ifNotInArray($supportedInheritanceTypes)
+                        ->thenInvalid('The %s inheritance type is not supported. Please choose one of '.json_encode($supportedInheritanceTypes))
+                        ->end()
+                    ->end()
+                ->end()
             ->end()
-            ->scalarNode('user_class')->isRequired()->cannotBeEmpty()->end();
+            ->scalarNode('db_prefix')->end();
+
 
         return $treeBuilder;
     }

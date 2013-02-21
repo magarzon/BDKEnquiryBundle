@@ -19,11 +19,6 @@ abstract class Response
     protected $key;
 
     /**
-     * @var string Type of the response. Can be anything that make senses to the application
-     */
-    protected $type='string';
-
-    /**
      * @var string Value of the response.
      */
     protected $value;
@@ -51,28 +46,6 @@ abstract class Response
         return $this->key;
     }
 
-
-    /**
-     * Set type
-     *
-     * @param string $type
-     * @return Response
-     */
-    public function setUser($type)
-    {
-        $this->type = $type;
-        return $this;
-    }
-
-    /**
-     * Get type
-     *
-     * @return string $type
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
 
     /**
      * Set value
