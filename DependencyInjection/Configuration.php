@@ -36,8 +36,9 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('db_driver')
                 ->validate()
                 ->ifNotInArray($supportedDrivers)
-                    ->thenInvalid('The driver %s is not supported. Please choose one of '
-                                .json_encode($supportedDrivers))
+                    ->thenInvalid(
+                        'The driver %s is not supported. Please choose one of '.json_encode($supportedDrivers)
+                    )
                 ->end()
                 ->cannotBeOverwritten()
                 ->isRequired()
@@ -60,8 +61,10 @@ class Configuration implements ConfigurationInterface
                         ->defaultValue('single')
                         ->validate()
                         ->ifNotInArray($supportedInheritanceTypes)
-                        ->thenInvalid('The %s inheritance type is not supported. Please choose one of '
-                                    .json_encode($supportedInheritanceTypes))
+                        ->thenInvalid(
+                            'The %s inheritance type is not supported. Please choose one of '
+                                .json_encode($supportedInheritanceTypes)
+                        )
                         ->end()
                     ->end()
                 ->end()
