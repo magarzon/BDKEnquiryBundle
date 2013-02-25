@@ -12,6 +12,7 @@
 namespace Bodaclick\BDKEnquiryBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -50,18 +51,32 @@ class BDKEnquiryExtension extends Extension
         if (count($defaultResponses) > 1 || !empty($responseClasses)) {
 
             //Set the listener that configure the response mapping, depending on configuration
-            $this->enableListener($container,'bdk.response_mapping.listener',array($responseClasses,$inheritanceType),$driver);
+            $this->enableListener(
+                $container,
+                'bdk.response_mapping.listener',
+                array($responseClasses,$inheritanceType),
+                $driver
+            );
         }
 
         //Set prefix to table or collection name
-        if (!empty($config['db_prefix']))
-        {
-            $this->enableListener($container,'bdk.db_prefix.listener',array($config['db_prefix']),$driver);
+        if (!empty($config['db_prefix'])) {
+            $this->enableListener(
+                $container,
+                'bdk.db_prefix.listener',
+                array($config['db_prefix']),
+                $driver
+            );
         }
-
 
         //Load the common services
         $loader->load('services.yml');
+
+        if (!empty($config['logger'])) {
+            $logger = new Reference($config['logger']);
+            $def = $container->getDefinition('bdk.enquiry.manager');
+            $def->addMethodCall('setLogger',array($logger));
+        }
     }
 
     protected function enableListener($container,$id,$arguments,$driver)

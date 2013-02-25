@@ -12,6 +12,7 @@
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
@@ -29,6 +30,13 @@ class EnquiryManager
     protected $objectManager;
 
     /**
+     * Optional logger to log service activity
+     *
+     * @var LoggerInterface $logger
+     */
+    protected $logger=null;
+
+    /**
      * Constructor.
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
@@ -37,6 +45,16 @@ class EnquiryManager
     public function __construct(ObjectManager $objectManager)
     {
         $this->objectManager = $objectManager;
+    }
+
+    /**
+     * Setter for the optional logger parameter
+     *
+     * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
     /**
@@ -90,7 +108,11 @@ class EnquiryManager
     {
 
         if (!is_object($about)) {
-            throw new \InvalidArgumentException('The about parameter must be an object and cannot be null');
+            $msg = 'The about parameter must be an object and cannot be null';
+            if ($this->logger) {
+                $this->logger->crit($msg);
+            }
+            throw new \InvalidArgumentException($msg);
         }
 
         //Check if the "about" object is persisted (has an identifier value),
@@ -98,12 +120,19 @@ class EnquiryManager
         try {
             $aboutMetadata = $this->objectManager->getClassMetadata(get_class($about));
         } catch(\Exception $e) {
-            throw new \InvalidArgumentException('The about parameter must be a valid entity or a valid document');
+            $msg = 'The about parameter must be a valid entity or a valid document';
+            if ($this->logger) {
+                $this->logger->crit($msg);
+            }
+            throw new \InvalidArgumentException($msg);
         }
 
         $ids = $aboutMetadata->getIdentifierValues($about);
 
         if (count($ids)==0) {
+            if ($this->logger) {
+                $this->logger->debug('About object not saved yet, proceed to save it');
+            }
             $this->objectManager->persist($about);
             $this->objectManager->flush();
         }
@@ -122,6 +151,14 @@ class EnquiryManager
         $this->objectManager->persist($enquiry);
         $this->objectManager->flush();
 
+        if ($this->logger) {
+            $this->logger->info(sprintf(
+                'Enquiry saved with about object of class %s, form value %s and name %s',
+                get_class($about),
+                $form,
+                $name)
+            );
+        }
 
         return $enquiry;
     }
@@ -139,6 +176,10 @@ class EnquiryManager
 
         $this->objectManager->remove($enquiry);
         $this->objectManager->flush();
+
+        if ($this->logger) {
+            $this->logger->info(sprintf('Enquiry %s removed', $enquiry->getName()));
+        }
     }
 
     /**
@@ -163,6 +204,15 @@ class EnquiryManager
         //Save to the database
         $this->objectManager->persist($enquiry);
         $this->objectManager->flush();
+
+        if ($this->logger) {
+            $this->logger->info(sprintf(
+                'Answer from user %s to enquiry %s saved',
+                $user->getUsername(),
+                $enquiry->getName()
+                )
+            );
+        }
     }
 
     /**
