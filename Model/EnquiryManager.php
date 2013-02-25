@@ -111,23 +111,15 @@ class EnquiryManager
      * Create an enquiry (database object, it'll be an entity or a document,
      * depending on the configuration), and return it
      *
-     * @param mixed $about The object that the enquiry is associated with. Can be of any type,
-     *                     but always an entity or a document
+     * @param AboutInterface $about The object that the enquiry is associated with. Can be of any type,
+     *                     but always an entity or a document implementing AboutInterface
      * @param string $form The name of a form associated to the enquiry. Only used for reference. Optional.
      * @param string $name A name associated to the enquiry. Optional. If specified, must be unique
      *
      * @return Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface The enquiry database object created
      */
-    public function saveEnquiry($about, $form=null, $name = null)
+    public function saveEnquiry(AboutInterface $about, $form=null, $name = null)
     {
-
-        if (!is_object($about)) {
-            $msg = 'The about parameter must be an object and cannot be null';
-            if ($this->logger) {
-                $this->logger->crit($msg);
-            }
-            throw new \InvalidArgumentException($msg);
-        }
 
         //Check if the "about" object is persisted (has an identifier value),
         //if not, persist it to get the right id when associated with enquiry
