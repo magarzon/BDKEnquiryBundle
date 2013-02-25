@@ -118,7 +118,7 @@ class EnquiryManager
      *
      * @return Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface The enquiry database object created
      */
-    public function saveEnquiry(AboutInterface $about, $form=null, $name = null)
+    public function saveEnquiry(AboutInterface $about, $form = null, $name = null)
     {
 
         //Check if the "about" object is persisted (has an identifier value),
