@@ -61,20 +61,6 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
         $this->fail('An expected exception has not been raised');
     }
 
-    public function testSaveEnquiryWithWrongAbout()
-    {
-        $form = 'testForm';
-        $name = 'testName';
-
-        try {
-            $this->enquiryManager->saveEnquiry("wrong",$form,$name);
-        } catch(\InvalidArgumentException $e) {
-            return;
-        }
-
-        $this->fail('An expected exception has not been raised');
-    }
-
     public function testGetEnquiriesFor()
     {
         $enquiries = $this->enquiryManager->getEnquiriesFor(new DummyAbout());
@@ -107,10 +93,10 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class DummyAbout
+class DummyAbout implements \Bodaclick\BDKEnquiryBundle\Model\AboutInterface
 {
 }
 
-class Dummy
+class Dummy implements \Bodaclick\BDKEnquiryBundle\Model\AboutInterface
 {
 }
