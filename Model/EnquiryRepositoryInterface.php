@@ -13,5 +13,5 @@ namespace Bodaclick\BDKEnquiryBundle\Model;
 
 interface EnquiryRepositoryInterface
 {
-    public function getEnquiriesFor($object);
+    public function getEnquiriesFor(AboutInterface $object);
 }

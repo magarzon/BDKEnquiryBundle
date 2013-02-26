@@ -12,6 +12,7 @@
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Bodaclick\BDKEnquiryBundle\Model\AboutInterface;
 use Bodaclick\BDKEnquiryBundle\Model\EnquiryRepositoryInterface;
 
 /**
@@ -26,7 +27,7 @@ class EnquiryRepository extends EntityRepository implements EnquiryRepositoryInt
      * @param mixed $object
      * @return mixed
      */
-    public function getEnquiriesFor($object)
+    public function getEnquiriesFor(AboutInterface $object)
     {
         //Generate the definition and find using the string generated
         $metadata = $this->getClassMetadata($object);

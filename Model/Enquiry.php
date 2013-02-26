@@ -140,7 +140,7 @@ abstract class Enquiry implements EnquiryInterface
     /**
      * Set about
      *
-     * @param stdClass $about
+     * @param mixed $about Can be an string representation or a AboutInterface object
      * @return Enquiry
      */
     public function setAbout($about)

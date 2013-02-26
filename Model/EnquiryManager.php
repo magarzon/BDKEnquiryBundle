@@ -12,6 +12,11 @@
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Bodaclick\BDKEnquiryBundle\Events\Events;
+use Symfony\Component\EventDispatcher\Event;
+use Bodaclick\BDKEnquiryBundle\Events\EnquiryEvent;
+use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
@@ -29,14 +34,39 @@ class EnquiryManager
     protected $objectManager;
 
     /**
+     * Dispatcher for the events
+     *
+     * @var Symfony\Component\EventDispatcher\EventDispatcherInterface
+     */
+    protected $dispatcher;
+
+    /**
+     * Optional logger to log service activity
+     *
+     * @var LoggerInterface $logger
+     */
+    protected $logger=null;
+
+    /**
      * Constructor.
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
-     * @param $securityContext
+     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher Optional dispatcher
      */
-    public function __construct(ObjectManager $objectManager)
+    public function __construct(ObjectManager $objectManager, EventDispatcherInterface $dispatcher=null)
     {
         $this->objectManager = $objectManager;
+        $this->dispatcher = $dispatcher;
+    }
+
+    /**
+     * Setter for the optional logger parameter
+     *
+     * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
     /**
@@ -78,34 +108,39 @@ class EnquiryManager
     }
 
     /**
-     * Create an enquiry (database object, it'll be an entity or a document, depending on the configuration), and return it
+     * Create an enquiry (database object, it'll be an entity or a document,
+     * depending on the configuration), and return it
      *
-     * @param mixed $about The object that the enquiry is associated with. Can be of any type, but always an entity or a document
+     * @param AboutInterface $about The object that the enquiry is associated with. Can be of any type,
+     *                     but always an entity or a document implementing AboutInterface
      * @param string $form The name of a form associated to the enquiry. Only used for reference. Optional.
      * @param string $name A name associated to the enquiry. Optional. If specified, must be unique
      *
      * @return Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface The enquiry database object created
      */
-    public function saveEnquiry($about, $form=null, $name = null)
+    public function saveEnquiry(AboutInterface $about, $form = null, $name = null)
     {
-
-        if (!is_object($about)) {
-            throw new \InvalidArgumentException('The about parameter must be an object and cannot be null');
-        }
 
         //Check if the "about" object is persisted (has an identifier value),
         //if not, persist it to get the right id when associated with enquiry
         try {
             $aboutMetadata = $this->objectManager->getClassMetadata(get_class($about));
         } catch(\Exception $e) {
-            throw new \InvalidArgumentException('The about parameter must be a valid entity or a valid document');
+            $msg = 'The about parameter must be a valid entity or a valid document';
+            if ($this->logger) {
+                $this->logger->crit($msg);
+            }
+            throw new \InvalidArgumentException($msg);
         }
 
         $ids = $aboutMetadata->getIdentifierValues($about);
 
         if (count($ids)==0) {
-            $this->objectManager->persist($about);
-            $this->objectManager->flush();
+                if ($this->logger) {
+                    $this->logger->debug('About object not saved yet, proceed to save it');
+                }
+                $this->objectManager->persist($about);
+                $this->objectManager->flush();
         }
 
         //Using the metadata to create a new database object, no matter which db driver is used
@@ -118,10 +153,28 @@ class EnquiryManager
         $enquiry->setName($name);
         $enquiry->setForm($form);
 
+        $event = new EnquiryEvent($enquiry);
+
+        //Dispatch event before persist object, and get the $enquiry object, in case the listener change it
+        $this->dispatchEvent(Events::PRE_PERSIST, $event);
+
+        $enquiry = $event->getEnquiry();
+
         //Persist the enquiry object
         $this->objectManager->persist($enquiry);
         $this->objectManager->flush();
 
+        //Dispatch event to inform object is persisted
+        $this->dispatchEvent(Events::POST_PERSIST, $event);
+
+        if ($this->logger) {
+            $this->logger->info(sprintf(
+                'Enquiry saved with about object of class %s, form value %s and name %s',
+                get_class($about),
+                $form,
+                $name)
+            );
+        }
 
         return $enquiry;
     }
@@ -137,8 +190,20 @@ class EnquiryManager
         //Get the actual database enquiry object, if name is specified in the param
         $enquiry = $this->resolveEnquiryParam($enquiry);
 
+        $event = new EnquiryEvent($enquiry);
+
+        //Dispatch event to inform object is to be removed
+        $this->dispatchEvent(Events::PRE_REMOVE, $event);
+
         $this->objectManager->remove($enquiry);
         $this->objectManager->flush();
+
+        //Dispatch event to inform object has removed
+        $this->dispatchEvent(Events::POST_REMOVE, $event);
+
+        if ($this->logger) {
+            $this->logger->info(sprintf('Enquiry %s removed', $enquiry->getName()));
+        }
     }
 
     /**
@@ -160,9 +225,28 @@ class EnquiryManager
 
         $answer->setUser($user);
 
+        $event = new EnquiryEvent($enquiry);
+
+        //Dispatch event and get the $enquiry object, in case the listener change it
+        $this->dispatchEvent(Events::PRE_PERSIST_ANSWER, $event);
+
+        $enquiry = $event->getEnquiry();
+
         //Save to the database
         $this->objectManager->persist($enquiry);
         $this->objectManager->flush();
+
+        //Dispatch event to inform object has persisted
+        $this->dispatchEvent(Events::POST_PERSIST_ANSWER, $event);
+
+        if ($this->logger) {
+            $this->logger->info(sprintf(
+                'Answer from user %s to enquiry %s saved',
+                $user->getUsername(),
+                $enquiry->getName()
+                )
+            );
+        }
     }
 
     /**
@@ -220,5 +304,18 @@ class EnquiryManager
             );
 
         return $enquiry;
+    }
+
+    /**
+     * Dispatch the event if there is a dispatcher available
+     *
+     * @param string $name Event's name
+     * @param \Symfony\Component\EventDispatcher\Event $event Event to dispatch
+     */
+    protected function dispatchEvent($name, Event $event)
+    {
+        if ($this->dispatcher) {
+            $this->dispatcher->dispatch($name, $event);
+        }
     }
 }
