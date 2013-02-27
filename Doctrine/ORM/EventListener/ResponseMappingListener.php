@@ -12,6 +12,7 @@
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener;
 
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
+use Bodaclick\BDKEnquiryBundle\DependencyInjection\InheritanceTypes;
 use Doctrine\ORM\Mapping\Builder\ClassMetadataBuilder;
 
 /**
@@ -60,10 +61,10 @@ class ResponseMappingListener
         $builder = new ClassMetadataBuilder($args->getClassMetadata());
 
         switch($this->inheritanceType) {
-            case 'single':
+            case InheritanceTypes::SINGLE:
                 $builder->setSingleTableInheritance();
                 break;
-            case 'joined':
+            case InheritanceType::JOINED:
                 $builder->setJoinedTableInheritance();
                 break;
         }

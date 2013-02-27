@@ -29,8 +29,8 @@ class Configuration implements ConfigurationInterface
 
         $rootNode = $treeBuilder->root('bdk_enquiry');
 
-        $supportedDrivers = array('orm', 'mongodb');
-        $supportedInheritanceTypes = array('single','joined');
+        $supportedDrivers = DriversSupported::getList();
+        $supportedInheritanceTypes = InheritanceTypes::getList();
 
         $rootNode->children()
             ->scalarNode('db_driver')

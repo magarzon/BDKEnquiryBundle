@@ -87,10 +87,14 @@ class BDKEnquiryExtension extends Extension
             $def->addArgument($argument);
         }
 
-        if ($driver=='orm') {
-            $def->addTag('doctrine.event_listener', array('event'=>'loadClassMetadata'));
-        } else {
-            $def->addTag('doctrine_mongodb.odm.event_listener', array('event'=>'loadClassMetadata'));
+        switch($driver) {
+            case DriversSupported::ORM:
+                $def->addTag('doctrine.event_listener', array('event'=>'loadClassMetadata'));
+                break;
+
+            case DriversSupported::MONGODB:
+                $def->addTag('doctrine_mongodb.odm.event_listener', array('event'=>'loadClassMetadata'));
+                break;
         }
     }
 }
