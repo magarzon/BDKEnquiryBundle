@@ -178,11 +178,13 @@ class EnquiryManager
         $this->dispatchEvent(Events::POST_PERSIST, $event);
 
         if ($this->logger) {
-            $this->logger->info(sprintf(
-                'Enquiry saved with about object of class %s, form value %s and name %s',
-                get_class($about),
-                $form,
-                $name)
+            $this->logger->info(
+                sprintf(
+                    'Enquiry saved with about object of class %s, form value %s and name %s',
+                    get_class($about),
+                    $form,
+                    $name
+                )
             );
         }
 
@@ -250,10 +252,11 @@ class EnquiryManager
         $this->dispatchEvent(Events::POST_PERSIST_ANSWER, $event);
 
         if ($this->logger) {
-            $this->logger->info(sprintf(
-                'Answer from user %s to enquiry %s saved',
-                $user->getUsername(),
-                $enquiry->getName()
+            $this->logger->info(
+                sprintf(
+                    'Answer from user %s to enquiry %s saved',
+                    $user->getUsername(),
+                    $enquiry->getName()
                 )
             );
         }
@@ -309,8 +312,10 @@ class EnquiryManager
             }
         } elseif (!($enquiry instanceof EnquiryInterface))
             throw new \InvalidArgumentException(
-                sprintf("The method param must be an object implementing EnquiryInterface
-                    or a string containing the name of an enquiry")
+                sprintf(
+                    "The method param must be an object implementing EnquiryInterface
+                    or a string containing the name of an enquiry"
+                )
             );
 
         return $enquiry;

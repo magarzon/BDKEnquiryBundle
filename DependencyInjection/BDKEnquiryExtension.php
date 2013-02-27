@@ -60,10 +60,12 @@ class BDKEnquiryExtension extends Extension
             //Check that user custom Response class mapping don't collide with default ones
             $checkCollides = array_intersect_key($defaultResponses, $responseClasses);
             if (count($checkCollides)>0) {
-                throw new \LogicException(sprintf(
-                    'Custom Response class mapping type not allowed: %s',
-                    key($checkCollides)
-                ));
+                throw new \LogicException(
+                    sprintf(
+                        'Custom Response class mapping type not allowed: %s',
+                        key($checkCollides)
+                    )
+                );
             }
 
             //Set the default Response class (key exist, it's checked above)
