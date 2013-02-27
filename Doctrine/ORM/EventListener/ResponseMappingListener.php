@@ -27,6 +27,7 @@ class ResponseMappingListener
     /**
      * Constructor
      *
+     * @param Response $defaultResponse Default Response base class
      * @param array $responseClasses Array with data mapping from configuration
      * @param string $inheritanceType Type of inheritance
      */

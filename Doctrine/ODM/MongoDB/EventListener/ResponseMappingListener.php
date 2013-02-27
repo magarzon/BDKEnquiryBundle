@@ -61,9 +61,8 @@ class ResponseMappingListener
             $map[$type]=$class;
         }
 
-        $classMetadata->mapManyEmbedded(array(
-            'name'=>'responses','discriminatorMap'=>$map,'strategy'=>'pushAll','discriminatorField'=>'type'
-            )
+        $classMetadata->mapManyEmbedded(
+            array('name'=>'responses','discriminatorMap'=>$map,'strategy'=>'pushAll','discriminatorField'=>'type')
         );
 
 

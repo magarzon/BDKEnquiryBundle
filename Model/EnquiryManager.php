@@ -80,8 +80,7 @@ class EnquiryManager
 
         if (is_array($enquiries)) {
             return array_pop($enquiries);
-        } elseif ($enquiries instanceof \Iterator)
-        {
+        } elseif ($enquiries instanceof \Iterator) {
             $enquiries->next();
             return $enquiries->current();
         } else {
