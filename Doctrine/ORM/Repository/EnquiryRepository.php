@@ -30,14 +30,16 @@ class EnquiryRepository extends EntityRepository implements EnquiryRepositoryInt
     public function getEnquiriesFor(AboutInterface $object)
     {
         //Generate the definition and find using the string generated
-        $metadata = $this->getClassMetadata($object);
+        $metadata = $this->getEntityManager()->getClassMetadata(get_class($object));
         $className = $metadata->getName();
         $ids = $metadata->getIdentifierValues($object);
         $definition = json_encode(compact("className", "ids"));
 
+        //Order from newer to older, so if we get the first one, we get the last enquiry saved
         $qb=$this->createQueryBuilder('e')
-            ->where('about = :definition')
-            ->setParameter('definition', $definition);
+            ->where('e.about = :definition')
+            ->setParameter('definition', $definition)
+            ->orderBy('e.id','DESC');
 
 
         return $qb->getQuery()->execute();

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\Repository;
+namespace Bodaclick\BDKEnquiryBundle\Doctrine\ODM\MongoDB\Repository;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
 use Bodaclick\BDKEnquiryBundle\Model\AboutInterface;
@@ -29,8 +29,13 @@ class EnquiryRepository extends DocumentRepository implements EnquiryRepositoryI
      */
     public function getEnquiriesFor(AboutInterface $object)
     {
-        $qb=$this->createQueryBuilder('e')
-            ->field('about.$id')->equals(new \MongoId($object->getId()));
+        //Order from newer to older, so if we get the first one, we get the last enquiry saved
+        $qb=$this->createQueryBuilder()
+            ->field('about.$id')->equals(new \MongoId($object->getId()))
+            ->sort('id','DESC');
+
+        //Disable check for indexes, because about reference cannot be indexed and throw an error otherwise
+        $qb->requireIndexes(false);
 
         return $qb->getQuery()->execute();
     }

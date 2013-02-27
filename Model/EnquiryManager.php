@@ -72,21 +72,31 @@ class EnquiryManager
     /**
      * Get the last enquiry associated to an object
      *
-     * @param mixed $object
+     * @param AboutInterface $object
      */
-    public function getEnquiryFor($object)
+    public function getEnquiryFor(AboutInterface $object)
     {
         $enquiries = $this->getEnquiriesFor($object);
 
-        return array_pop($enquiries);
+        if (is_array($enquiries)) {
+            return array_pop($enquiries);
+        } elseif ($enquiries instanceof \Iterator)
+        {
+            $enquiries->next();
+            return $enquiries->current();
+        } else {
+            throw new \UnexpectedValueException(
+                'EnquiryRepository method must return an array or object implementing Iterator interface'
+            );
+        }
     }
 
     /**
      * Get all the enquiries previously associated to an object
      *
-     * @param mixed $object
+     * @param AboutInterface $object
      */
-    public function getEnquiriesFor($object)
+    public function getEnquiriesFor(AboutInterface $object)
     {
         //A custom repository is used, so each type of database driver (orm, mongodb,...)
         //can build the most eficient query
