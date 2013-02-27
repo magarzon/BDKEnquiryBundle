@@ -22,7 +22,7 @@ class ResponseMappingListener
 {
     protected $responseClasses;
     protected $inheritanceType;
-    protected $defaultMapping;
+    protected $defaultResponse;
 
     /**
      * Constructor
@@ -30,11 +30,11 @@ class ResponseMappingListener
      * @param array $responseClasses Array with data mapping from configuration
      * @param string $inheritanceType Type of inheritance
      */
-    public function __construct($defaultMapping, $responseClasses, $inheritanceType)
+    public function __construct($defaultResponse, $responseClasses, $inheritanceType)
     {
         $this->responseClasses = $responseClasses;
         $this->inheritanceType = $inheritanceType;
-        $this->defaultMapping = $defaultMapping;
+        $this->defaultResponse = $defaultResponse;
     }
 
     /**
@@ -46,13 +46,27 @@ class ResponseMappingListener
     {
         $classMetadata = $args->getClassMetadata();
 
-        if ($classMetadata->getName()!=='Bodaclick\BDKEnquiryBundle\Entity\Response') {
+        $name = $classMetadata->getName();
+
+        //If it's a defined response class, check if it's subclass of the default one
+        if (in_array($name,array_values($this->responseClasses))) {
+             if (!$classMetadata->getReflectionClass()->isSubclassOf($this->defaultResponse)) {
+                 throw new \LogicException(sprintf(
+                     'The mapped response class %s is not a subclass of %s',
+                     $name,
+                     $this->defaultResponse
+                 ));
+             }
+        }
+
+        //The discriminator map is only needed in the default Response class
+        if ($classMetadata->getName()!==$this->defaultResponse) {
             return;
         }
 
         //Only if there are more than one Response class either in default classes
         //or in configuration, they are mapped as single or class table inheritance
-        if (count($this->defaultMapping)<=1 && empty($this->responseClasses)) {
+        if (empty($this->responseClasses)) {
             return;
         }
 
@@ -64,19 +78,15 @@ class ResponseMappingListener
             case InheritanceTypes::SINGLE:
                 $builder->setSingleTableInheritance();
                 break;
-            case InheritanceType::JOINED:
+            case InheritanceTypes::JOINED:
                 $builder->setJoinedTableInheritance();
                 break;
         }
 
         $builder->setDiscriminatorColumn('type');
 
-        foreach($this->defaultMapping as $type=>$class) {
-            $builder->addDiscriminatorMapClass($type, $class);
-        }
-
         foreach($this->responseClasses as $type=>$class) {
-            $builder->addDiscriminatorMapClass($type, $class['class']);
+            $builder->addDiscriminatorMapClass($type, $class);
         }
 
     }

@@ -47,14 +47,37 @@ class BDKEnquiryExtension extends Extension
 
         $defaultResponses = $container->getParameter('bdk.response_mapping');
 
+        //Check that default Response class is defined
+        if ($defaultResponses==null || !isset($defaultResponses['default'])) {
+            throw new \LogicException('No default Response class defined in bundle configuration');
+        }
+
         //Only enable the listeners for mapping Response classes if there are more than one
         if (count($defaultResponses) > 1 || !empty($responseClasses)) {
+            //Normalize the user custom Response classes array
+            $responseClasses = array_map(function($value){return $value['class'];}, $responseClasses);
+
+            //Check that user custom Response class mapping don't collide with default ones
+            $checkCollides = array_intersect_key($defaultResponses, $responseClasses);
+            if (count($checkCollides)>0) {
+                throw new \LogicException(sprintf(
+                    'Custom Response class mapping type not allowed: %s',
+                    key($checkCollides)
+                ));
+            }
+
+            //Set the default Response class (key exist, it's checked above)
+            $defaultResponse = $defaultResponses['default'];
+            unset($defaultResponses['default']);
+
+            //Merge with default Response classes
+            $responseClasses = array_merge($defaultResponses, $responseClasses);
 
             //Set the listener that configure the response mapping, depending on configuration
             $this->enableListener(
                 $container,
                 'bdk.response_mapping.listener',
-                array($responseClasses,$inheritanceType),
+                array($defaultResponse, $responseClasses, $inheritanceType),
                 $driver
             );
         }
