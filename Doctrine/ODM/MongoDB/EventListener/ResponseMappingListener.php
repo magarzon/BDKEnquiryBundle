@@ -20,17 +20,18 @@ use Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs;
 class ResponseMappingListener
 {
     protected $responseClasses;
-    protected $defaultMapping;
+    protected $defaultResponse;
 
     /**
      * Constructor
      *
+     * @param $defaultResponse Default Response class
      * @param array $responseClasses Array with data mapping from configuration
      */
-    public function __construct($defaultMapping, $responseClasses)
+    public function __construct($defaultResponse, $responseClasses)
     {
+        $this->defaultResponse = $defaultResponse;
         $this->responseClasses = $responseClasses;
-        $this->defaultMapping = $defaultMapping;
     }
 
     /**
@@ -42,30 +43,26 @@ class ResponseMappingListener
     {
         $classMetadata = $args->getClassMetadata();
 
+        //The discriminatorMap is set in Answer class
         if ($classMetadata->getName()!=='Bodaclick\BDKEnquiryBundle\Document\Answer') {
             return;
         }
 
         //If only one default Response class and no subclasses given in configuration,
         //no changes to the mapping are made
-        if (count($this->defaultMapping)<=1 && empty($this->responseClasses)) {
+        if (empty($this->responseClasses)) {
             return;
         }
 
         //If there are more than one default Response class or in configuration, override the default mapping
-        $map = array();
+        $map = array('default'=>$this->defaultResponse);
 
-        foreach($this->defaultMapping as $type=>$class) {
+        foreach($this->responseClasses as $type=>$class) {
             $map[$type]=$class;
         }
 
-        foreach($this->responseClasses as $type=>$class) {
-            $map[$type]=$class['class'];
-        }
-
-        $classMetadata->mapManyEmbedded(array(
-            'name'=>'responses','discriminatorMap'=>$map,'strategy'=>'pushAll','discriminatorField'=>'type'
-            )
+        $classMetadata->mapManyEmbedded(
+            array('name'=>'responses','discriminatorMap'=>$map,'strategy'=>'pushAll','discriminatorField'=>'type')
         );
 
 

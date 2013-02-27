@@ -12,7 +12,6 @@ services:
 
     bdk.response_mapping.listener:
         class: Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener\ResponseMappingListener
-        arguments: [ %bdk.response_mapping%]
         public: false
 
     bdk.db_prefix.listener:
