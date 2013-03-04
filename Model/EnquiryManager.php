@@ -50,10 +50,10 @@ class EnquiryManager
     /**
      * Constructor.
      *
-     * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
-     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher Optional dispatcher
+     * @param \Doctrine\Common\Persistence\ObjectManager        $objectManager
+     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher    Optional dispatcher
      */
-    public function __construct(ObjectManager $objectManager, EventDispatcherInterface $dispatcher=null)
+    public function __construct(ObjectManager $objectManager, EventDispatcherInterface $dispatcher)
     {
         $this->objectManager = $objectManager;
         $this->dispatcher = $dispatcher;
@@ -82,6 +82,7 @@ class EnquiryManager
             return array_pop($enquiries);
         } elseif ($enquiries instanceof \Iterator) {
             $enquiries->next();
+
             return $enquiries->current();
         } else {
             throw new \UnexpectedValueException(
@@ -134,7 +135,7 @@ class EnquiryManager
         //if not, persist it to get the right id when associated with enquiry
         try {
             $aboutMetadata = $this->objectManager->getClassMetadata(get_class($about));
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $msg = 'The about parameter must be a valid entity or a valid document';
             if ($this->logger) {
                 $this->logger->crit($msg);
@@ -144,12 +145,12 @@ class EnquiryManager
 
         $ids = $aboutMetadata->getIdentifierValues($about);
 
-        if (count($ids)==0) {
-                if ($this->logger) {
-                    $this->logger->debug('About object not saved yet, proceed to save it');
-                }
-                $this->objectManager->persist($about);
-                $this->objectManager->flush();
+        if (count($ids) == 0) {
+            if ($this->logger) {
+                $this->logger->debug('About object not saved yet, proceed to save it');
+            }
+            $this->objectManager->persist($about);
+            $this->objectManager->flush();
         }
 
         //Using the metadata to create a new database object, no matter which db driver is used
@@ -222,8 +223,8 @@ class EnquiryManager
      * The enquiry can be specified by its database object representation or by name
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
-     * @param Bodaclick\BDKEnquiryBundle\Model\Answer $answer An answer object containing the responses given
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to.
+     * @param Bodaclick\BDKEnquiryBundle\Model\Answer             $answer An answer object containing the responses given
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user   The user that the answers belongs to.
      */
     public function saveAnswer($enquiry, Answer $answer, UserInterface $user)
     {
@@ -323,7 +324,7 @@ class EnquiryManager
     /**
      * Dispatch the event if there is a dispatcher available
      *
-     * @param string $name Event's name
+     * @param string                                   $name  Event's name
      * @param \Symfony\Component\EventDispatcher\Event $event Event to dispatch
      */
     protected function dispatchEvent($name, Event $event)

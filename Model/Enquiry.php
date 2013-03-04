@@ -47,7 +47,6 @@ abstract class Enquiry implements EnquiryInterface
         $this->answers = new ArrayCollection();
     }
 
-
     /**
      * Get id
      *
@@ -61,7 +60,7 @@ abstract class Enquiry implements EnquiryInterface
     /**
      * Set name
      *
-     * @param string $name
+     * @param  string  $name
      * @return Enquiry
      */
     public function setName($name)
@@ -84,7 +83,7 @@ abstract class Enquiry implements EnquiryInterface
     /**
      * Set answers
      *
-     * @param Collection $answers
+     * @param  Collection $answers
      * @return Enquiry
      */
     public function setAnswers(Collection $answers)
@@ -117,7 +116,7 @@ abstract class Enquiry implements EnquiryInterface
     /**
      * Set form
      *
-     * @param string $form
+     * @param  string  $form
      * @return Enquiry
      */
     public function setForm($form)
@@ -140,7 +139,7 @@ abstract class Enquiry implements EnquiryInterface
     /**
      * Set about
      *
-     * @param mixed $about Can be an string representation or a AboutInterface object
+     * @param  mixed   $about Can be an string representation or a AboutInterface object
      * @return Enquiry
      */
     public function setAbout($about)

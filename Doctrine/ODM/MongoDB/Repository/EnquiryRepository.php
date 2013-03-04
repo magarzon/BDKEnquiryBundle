@@ -23,7 +23,7 @@ class EnquiryRepository extends DocumentRepository implements EnquiryRepositoryI
     /**
      * Gets all the enquiries associated with an object
      *
-     * @param AboutInterface $object
+     * @param  AboutInterface                                                       $object
      * @return array|bool|\Doctrine\MongoDB\ArrayIterator|\Doctrine\MongoDB\Cursor|
      *          \Doctrine\MongoDB\EagerCursor|int|mixed|\MongoCursor|null
      */

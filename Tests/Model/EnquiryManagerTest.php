@@ -26,11 +26,9 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('BDKEnquiryBundle:Enquiry'))
             ->will($this->returnValue($this->repository));
 
-
         $this->objectManager->expects($this->any())
             ->method('getClassMetadata')
             ->will($this->returnCallback(array($this, 'createClassMetadata')));
-
 
         $this->enquiryManager = $this->createEnquiryManager($this->objectManager);
     }
@@ -54,7 +52,7 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
 
         try {
             $this->enquiryManager->saveEnquiry(new Dummy(),$form,$name);
-        } catch(\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             return;
         }
 
