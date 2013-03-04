@@ -57,14 +57,13 @@ class ResponseMappingListener
         //If there are more than one default Response class or in configuration, override the default mapping
         $map = array('default'=>$this->defaultResponse);
 
-        foreach($this->responseClasses as $type=>$class) {
+        foreach ($this->responseClasses as $type=>$class) {
             $map[$type]=$class;
         }
 
         $classMetadata->mapManyEmbedded(
             array('name'=>'responses','discriminatorMap'=>$map,'strategy'=>'pushAll','discriminatorField'=>'type')
         );
-
 
     }
 }

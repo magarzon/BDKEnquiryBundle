@@ -30,12 +30,13 @@ class EnquiryEvent extends Event
     /**
      * Set the enquiry object associated to the event
      *
-     * @param Enquiry $enquiry
+     * @param  Enquiry      $enquiry
      * @return EnquiryEvent
      */
     public function setEnquiry(Enquiry $enquiry)
     {
         $this->enquiry = $enquiry;
+
         return $this;
     }
 

@@ -12,7 +12,6 @@
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener;
 
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\Mapping\Builder\ClassMetadataBuilder;
 
 /**

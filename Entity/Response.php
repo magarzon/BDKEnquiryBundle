@@ -41,15 +41,15 @@ class Response extends BaseResponse
     /**
      * Set Answer
      *
-     * @param Answer $answer
+     * @param  Answer   $answer
      * @return Response
      */
     public function setAnswer(Answer $answer)
     {
         $this->answer = $answer;
+
         return $this;
     }
-
 
     /**
      * Get Answer

@@ -24,7 +24,7 @@ class EnquiryRepository extends EntityRepository implements EnquiryRepositoryInt
     /**
      * Gets all the enquiries associated with an object
      *
-     * @param mixed $object
+     * @param  mixed $object
      * @return mixed
      */
     public function getEnquiriesFor(AboutInterface $object)
@@ -40,7 +40,6 @@ class EnquiryRepository extends EntityRepository implements EnquiryRepositoryInt
             ->where('e.about = :definition')
             ->setParameter('definition', $definition)
             ->orderBy('e.id','DESC');
-
 
         return $qb->getQuery()->execute();
     }

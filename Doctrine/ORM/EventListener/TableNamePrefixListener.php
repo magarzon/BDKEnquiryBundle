@@ -45,7 +45,6 @@ class TableNamePrefixListener
             return;
         }
 
-
         //Setting the hierarchy of Response classes and subclasses
         //depending on mapping given in configuration
         $builder = new ClassMetadataBuilder($args->getClassMetadata());

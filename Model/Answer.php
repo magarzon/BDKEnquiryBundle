@@ -37,7 +37,6 @@ abstract class Answer
      */
     protected $responses;
 
-
     public function __construct()
     {
         $this->responses = new ArrayCollection();
@@ -53,7 +52,6 @@ abstract class Answer
         return $this->id;
     }
 
-
     /**
     * Set user
     *
@@ -63,6 +61,7 @@ abstract class Answer
     public function setUser(UserInterface $user)
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -79,12 +78,13 @@ abstract class Answer
     /**
      * Set enquiry
      *
-     * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface $enquiry
+     * @param  Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface $enquiry
      * @return Answer
      */
     public function setEnquiry(EnquiryInterface $enquiry)
     {
         $this->enquiry = $enquiry;
+
         return $this;
     }
 
@@ -101,12 +101,13 @@ abstract class Answer
     /**
      * Set responses
      *
-     * @param Collection $responses
+     * @param  Collection $responses
      * @return Answer
      */
     public function setResponses(Collection $responses)
     {
         $this->responses = $responses;
+
         return $this;
     }
 
