@@ -229,14 +229,9 @@ class EnquiryManager
 
         $event = new EnquiryEvent($enquiry);
 
-        //Dispatch event to inform object is to be removed
-        $this->dispatcher->dispatch(Events::PRE_REMOVE, $event);
-
         $this->objectManager->remove($enquiry);
         $this->objectManager->flush();
 
-        //Dispatch event to inform object has removed
-        $this->dispatcher->dispatch(Events::POST_REMOVE, $event);
 
         if ($this->logger) {
             $this->logger->info(sprintf('Enquiry %s removed', $enquiry->getName()));
