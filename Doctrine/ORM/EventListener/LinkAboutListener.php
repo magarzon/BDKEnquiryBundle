@@ -32,11 +32,9 @@ class LinkAboutListener
 
             //The class metadata is used to get the identifiers, that could be compound
             $metadata = $event->getEntityManager()->getClassMetadata(get_class($about));
-            $className = $metadata->getName();
-            $ids = $metadata->getIdentifierValues($about);
 
             //And used to generate a definition/semi-serialization of the about object in JSON format
-            $definition = json_encode(compact("className", "ids"));
+            $definition = json_encode(array("className"=>$metadata->getName(), "ids"=>$metadata->getIdentifierValues($about)));
 
             //Change the about object by its definition
             $enquiry->setAbout($definition);
@@ -68,11 +66,11 @@ class LinkAboutListener
             $enquiry = $event->getEntity();
             $definition = $enquiry->getAbout();
 
+            //The definition consist in an array with the names of the variables and their value in JSON format
             $object = json_decode($definition, true);
 
-            //The definition consist in an array with the names of the variables and their value in JSON format
-            //The php extract method is used to "make" that variables, $className and $ids
-            extract(json_decode($definition, true));
+            $className = $object['className'];
+            $ids = $object['ids'];
 
             //Only a reference (proxy) to the about object is set, so no query to the database is needed
             //until one of the about object's field is accessed.
