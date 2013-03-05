@@ -171,12 +171,12 @@ class EnquiryManager
 
         $ids = $aboutMetadata->getIdentifierValues($about);
 
-        if (count($ids)==0) {
-                if ($this->logger) {
-                    $this->logger->debug('About object not saved yet, proceed to save it');
-                }
-                $this->objectManager->persist($about);
-                $this->objectManager->flush();
+        if (count($ids) == 0) {
+            if ($this->logger) {
+                $this->logger->debug('About object not saved yet, proceed to save it');
+            }
+            $this->objectManager->persist($about);
+            $this->objectManager->flush();
         }
 
         //Using the metadata to create a new database object, no matter which db driver is used
@@ -244,8 +244,8 @@ class EnquiryManager
      * The responses come in an array of Response objects
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
-     * @param Bodaclick\BDKEnquiryBundle\Model\Answer             $answer An answer object containing the responses given
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user   The user that the answers belongs to. Optional.
+     * @param Bodaclick\BDKEnquiryBundle\Model\Answer            $answer An answer object containing the responses given
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user  The user that the answers belongs to. Optional.
      */
     public function saveAnswer($enquiry, Answer $answer, UserInterface $user = null)
     {
@@ -295,8 +295,8 @@ class EnquiryManager
      * The responses come in an array of Response objects
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
-     * @param array                                               $responses Array of Response objects or raw key=>value pair
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user      The user that the answers belongs to. Optional.
+     * @param array                                          $responses Array of Response objects or raw key=>value pair
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user  The user that the answers belongs to. Optional.
      */
     public function saveResponses($enquiry, array $responses, UserInterface $user=null)
     {

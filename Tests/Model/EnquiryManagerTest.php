@@ -30,6 +30,7 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
             ->method('getClassMetadata')
             ->will($this->returnCallback(array($this, 'createClassMetadata')));
 
+
         $dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcher');
         $defaultClass = 'Bodaclick\BDKEnquiryBundle\Model\Response';
         $this->enquiryManager = $this->createEnquiryManager($this->objectManager, $dispatcher, $defaultClass );

@@ -50,7 +50,7 @@ class ResponseMappingListener
         $name = $classMetadata->getName();
 
         //If it's a defined response class, check if it's subclass of the default one
-        if (in_array($name,array_values($this->responseClasses))) {
+        if (in_array($name, array_values($this->responseClasses))) {
              if (!$classMetadata->getReflectionClass()->isSubclassOf($this->defaultResponse)) {
                  throw new \LogicException(
                      sprintf(

@@ -19,7 +19,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
  * The about object is of an unknown class, so we save a definition (className and id) in JSON Format
  * when the enquiry object is persisted, and convert again in the actual object when an enquiry object
  * is loaded from the database or after persisted in the database (so getAbout always return an object
- * and not a definition
+ * and not a definition)
  */
 class LinkAboutListener
 {
