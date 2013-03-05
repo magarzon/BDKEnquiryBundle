@@ -12,9 +12,11 @@
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizableInterface;
 use Doctrine\Common\Collections\Collection;
 
-abstract class Enquiry implements EnquiryInterface
+abstract class Enquiry implements EnquiryInterface, NormalizableInterface
 {
     /**
      * @var integer
@@ -158,5 +160,38 @@ abstract class Enquiry implements EnquiryInterface
     public function getAbout()
     {
         return $this->about;
+    }
+
+    /**
+     * Normalize function used to convert the object in an array of fields
+     *
+     * @param \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
+     * @param string|null $format
+     * @return array|\Symfony\Component\Serializer\Normalizer\scalar
+     */
+    public function normalize(NormalizerInterface $normalizer, $format = null)
+    {
+        $normalized = array();
+
+        $normalized['id'] = $this->id;
+
+        if ($this->form!=null) {
+            $normalized['form'] = $this->form;
+        }
+
+        if ($this->name!=null) {
+            $normalized['name'] = $this->name;
+        }
+
+        $answers = array();
+
+        foreach($this->answers as $answer) {
+            $answers[] = $normalizer->normalize($answer,$format);
+        }
+
+        $normalized['answers'] = $answers;
+
+        return array('enquiry'=>$normalized);
+
     }
 }

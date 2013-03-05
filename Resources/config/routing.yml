@@ -1,3 +1,18 @@
-bdk_enquiry_homepage:
-    pattern:  /hello/{name}
-    defaults: { _controller: BDKEnquiryBundle:Default:index }
+bdk_enquiry_get:
+    pattern:  /enquiry/get/{id}.{_format}
+    defaults: { _controller: BDKEnquiryBundle:Enquiry:getEnquiry, _format: json }
+    requirements:
+        _format: %bdk.enquiry.api.supported_formats%
+
+bdk_enquiry_get_by_name:
+    pattern:  /enquiry/get_by_name/{name}.{_format}
+    defaults: { _controller: BDKEnquiryBundle:Enquiry:getEnquiryByName, _format: json }
+    requirements:
+        _format: %bdk.enquiry.api.supported_formats%
+
+bdk_enquiry_save_answer:
+    pattern:  /answer/save/{enquiryId}.{_format}
+    defaults: { _controller: BDKEnquiryBundle:Enquiry:saveAnswer, _format: json }
+    requirements:
+        _format:  %bdk.enquiry.api.supported_formats%
+        _method: POST
