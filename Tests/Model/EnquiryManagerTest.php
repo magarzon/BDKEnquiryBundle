@@ -71,7 +71,7 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function createEnquiryManager($objectManager, $dispatcher, $defaultClass)
     {
-        return new EnquiryManager($objectManager, $dispatcher, $defaultClass );
+        return new EnquiryManager($objectManager, $dispatcher, $defaultClass , array() );
     }
 
     public function createClassMetadata($classname)
