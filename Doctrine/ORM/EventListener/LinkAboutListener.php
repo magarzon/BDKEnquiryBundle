@@ -47,7 +47,7 @@ class LinkAboutListener
     {
         if ($event->getEntity() instanceof \Bodaclick\BDKEnquiryBundle\Entity\Enquiry) {
             //The about object is inmutable, so undo changes to that field in updates
-            $event->setNewValue('about',$event->getOldValue('about'));
+            $event->setNewValue('about', $event->getOldValue('about'));
         }
 
     }

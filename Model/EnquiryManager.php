@@ -12,6 +12,7 @@
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Bodaclick\BDKEnquiryBundle\Events\Events;
 use Symfony\Component\EventDispatcher\Event;
@@ -41,6 +42,14 @@ class EnquiryManager
     protected $dispatcher;
 
     /**
+     * Default Response class, used to build responses if needed.
+     * Must be a descendant of Response abstract class in the bundle model.
+     *
+     * @var Bodaclick\BDKEnquiryBundle\Model\Response
+     */
+    protected $defaultResponseClass;
+
+    /**
      * Optional logger to log service activity
      *
      * @var LoggerInterface $logger
@@ -53,10 +62,15 @@ class EnquiryManager
      * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
      * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher Optional dispatcher
      */
-    public function __construct(ObjectManager $objectManager, EventDispatcherInterface $dispatcher=null)
+    public function __construct(
+        ObjectManager $objectManager,
+        EventDispatcherInterface $dispatcher=null,
+        $defaultResponseClass
+    )
     {
         $this->objectManager = $objectManager;
         $this->dispatcher = $dispatcher;
+        $this->defaultResponseClass = $defaultResponseClass;
     }
 
     /**
@@ -112,6 +126,18 @@ class EnquiryManager
     public function getEnquiryByName($name)
     {
         $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->findOneBy(array('name'=>$name));
+
+        return $enquiry;
+    }
+
+    /**
+     * Get an enquiry by id
+     *
+     * @param $id
+     */
+    public function getEnquiry($id)
+    {
+        $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->find($id);
 
         return $enquiry;
     }
@@ -220,25 +246,29 @@ class EnquiryManager
     /**
      * Save the answers to an enquiry to the database.
      * The enquiry can be specified by its database object representation or by name
+     * The responses come in an array of Response objects
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
      * @param Bodaclick\BDKEnquiryBundle\Model\Answer $answer An answer object containing the responses given
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to.
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to. Optional.
      */
-    public function saveAnswer($enquiry, Answer $answer, UserInterface $user)
+    public function saveAnswer($enquiry, Answer $answer, UserInterface $user = null)
     {
 
         //Get the actual database enquiry object, if name is specified in the param
         $enquiry = $this->resolveEnquiryParam($enquiry);
 
-        //Associate the answers
+        //Associate the answer to the enquiry
         $enquiry->addAnswer($answer);
 
-        $answer->setUser($user);
-
-        $event = new EnquiryEvent($enquiry);
+        //Associate the user if any
+        if ($user!=null) {
+            $answer->setUser($user);
+        }
 
         //Dispatch event and get the $enquiry object, in case the listener change it
+        $event = new EnquiryEvent($enquiry);
+
         $this->dispatchEvent(Events::PRE_PERSIST_ANSWER, $event);
 
         $enquiry = $event->getEnquiry();
@@ -251,15 +281,64 @@ class EnquiryManager
         $this->dispatchEvent(Events::POST_PERSIST_ANSWER, $event);
 
         if ($this->logger) {
-            $this->logger->info(
-                sprintf(
+            if ($user) {
+                $msg = sprintf(
                     'Answer from user %s to enquiry %s saved',
                     $user->getUsername(),
                     $enquiry->getName()
-                )
-            );
+                );
+            } else {
+                $msg = sprintf('Answer from anonymous user to enquiry %s saved', $enquiry->getName());
+            }
+            $this->logger->info($msg);
         }
     }
+
+    /**
+     * Save the responses to an enquiry to the database.
+     * The enquiry can be specified by its database object representation or by name
+     * The responses come in an array of Response objects
+     *
+     * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
+     * @param array $responses Array of Response objects or raw key=>value pair
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to. Optional.
+     */
+    public function saveResponses($enquiry, array $responses, UserInterface $user=null)
+    {
+        //Check the type of the responses, if they are raw key-value pairs, convert into default Response objects
+        //Throw and exception if they are objects of classes not descendant of default Response class
+        $checkFunction = function(&$value, $key, $defaultResponseClass) {
+            if (!is_object($value)) {
+                $response = new $defaultResponseClass;
+                $response->setValue($value);
+                $response->setKey($key);
+                $value = $response;
+            } elseif (!($value instanceof Response)) {
+                throw new \Exception();
+            }
+        };
+
+        try {
+            array_walk($responses, $checkFunction, $this->defaultResponseClass);
+        } catch(\Exception $e) {
+            $msg = 'The responses parameter must contain an array of Response objects or key-value pairs';
+            if ($this->logger) {
+                $this->logger->crit($msg);
+            }
+            throw new \InvalidArgumentException($msg);
+        }
+
+        //Create the answer instance object
+        $answer = $this->createAnswer();
+
+        //Add the responses to the answer instance
+        $answer->setResponses(new ArrayCollection($responses));
+
+        //Call the saveAnswer method with the new answer created
+        $this->saveAnswer($enquiry, $answer, $user);
+    }
+
+
 
     /**
      * Create an empty answer entity or document
@@ -281,10 +360,7 @@ class EnquiryManager
      */
     public function createResponse()
     {
-        $metadata = $this->objectManager->getClassMetadata('BDKEnquiryBundle:Response');
-        $response = $metadata->getReflectionClass()->newInstance();
-
-        return $response;
+        return new $this->defaultResponseClass;
     }
 
     /**
