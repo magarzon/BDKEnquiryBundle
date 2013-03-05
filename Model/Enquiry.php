@@ -49,7 +49,6 @@ abstract class Enquiry implements EnquiryInterface, NormalizableInterface
         $this->answers = new ArrayCollection();
     }
 
-
     /**
      * Get id
      *
@@ -63,7 +62,7 @@ abstract class Enquiry implements EnquiryInterface, NormalizableInterface
     /**
      * Set name
      *
-     * @param string $name
+     * @param  string  $name
      * @return Enquiry
      */
     public function setName($name)
@@ -86,7 +85,7 @@ abstract class Enquiry implements EnquiryInterface, NormalizableInterface
     /**
      * Set answers
      *
-     * @param Collection $answers
+     * @param  Collection $answers
      * @return Enquiry
      */
     public function setAnswers(Collection $answers)
@@ -119,7 +118,7 @@ abstract class Enquiry implements EnquiryInterface, NormalizableInterface
     /**
      * Set form
      *
-     * @param string $form
+     * @param  string  $form
      * @return Enquiry
      */
     public function setForm($form)
@@ -142,7 +141,7 @@ abstract class Enquiry implements EnquiryInterface, NormalizableInterface
     /**
      * Set about
      *
-     * @param mixed $about Can be an string representation or a AboutInterface object
+     * @param  mixed   $about Can be an string representation or a AboutInterface object
      * @return Enquiry
      */
     public function setAbout($about)
@@ -165,8 +164,8 @@ abstract class Enquiry implements EnquiryInterface, NormalizableInterface
     /**
      * Normalize function used to convert the object in an array of fields
      *
-     * @param \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
-     * @param string|null $format
+     * @param  \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
+     * @param  string|null                                                  $format
      * @return array|\Symfony\Component\Serializer\Normalizer\scalar
      */
     public function normalize(NormalizerInterface $normalizer, $format = null)
@@ -185,7 +184,7 @@ abstract class Enquiry implements EnquiryInterface, NormalizableInterface
 
         $answers = array();
 
-        foreach($this->answers as $answer) {
+        foreach ($this->answers as $answer) {
             $answers[] = $normalizer->normalize($answer,$format);
         }
 

@@ -72,7 +72,6 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('db_prefix')->end()
             ->scalarNode('logger')->end();
 
-
         return $treeBuilder;
     }
 }

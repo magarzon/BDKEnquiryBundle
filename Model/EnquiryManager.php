@@ -59,7 +59,7 @@ class EnquiryManager
     /**
      * Constructor.
      *
-     * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
+     * @param \Doctrine\Common\Persistence\ObjectManager        $objectManager
      * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher
      */
     public function __construct(
@@ -96,6 +96,7 @@ class EnquiryManager
             return array_pop($enquiries);
         } elseif ($enquiries instanceof \Iterator) {
             $enquiries->next();
+
             return $enquiries->current();
         } else {
             throw new \UnexpectedValueException(
@@ -160,7 +161,7 @@ class EnquiryManager
         //if not, persist it to get the right id when associated with enquiry
         try {
             $aboutMetadata = $this->objectManager->getClassMetadata(get_class($about));
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $msg = 'The about parameter must be a valid entity or a valid document';
             if ($this->logger) {
                 $this->logger->crit($msg);
@@ -232,7 +233,6 @@ class EnquiryManager
         $this->objectManager->remove($enquiry);
         $this->objectManager->flush();
 
-
         if ($this->logger) {
             $this->logger->info(sprintf('Enquiry %s removed', $enquiry->getName()));
         }
@@ -244,8 +244,8 @@ class EnquiryManager
      * The responses come in an array of Response objects
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
-     * @param Bodaclick\BDKEnquiryBundle\Model\Answer $answer An answer object containing the responses given
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to. Optional.
+     * @param Bodaclick\BDKEnquiryBundle\Model\Answer             $answer An answer object containing the responses given
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user   The user that the answers belongs to. Optional.
      */
     public function saveAnswer($enquiry, Answer $answer, UserInterface $user = null)
     {
@@ -295,8 +295,8 @@ class EnquiryManager
      * The responses come in an array of Response objects
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
-     * @param array $responses Array of Response objects or raw key=>value pair
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user The user that the answers belongs to. Optional.
+     * @param array                                               $responses Array of Response objects or raw key=>value pair
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user      The user that the answers belongs to. Optional.
      */
     public function saveResponses($enquiry, array $responses, UserInterface $user=null)
     {
@@ -315,7 +315,7 @@ class EnquiryManager
 
         try {
             array_walk($responses, $checkFunction, $this->defaultResponseClass);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $msg = 'The responses parameter must contain an array of Response objects or key-value pairs';
             if ($this->logger) {
                 $this->logger->crit($msg);
@@ -332,8 +332,6 @@ class EnquiryManager
         //Call the saveAnswer method with the new answer created
         $this->saveAnswer($enquiry, $answer, $user);
     }
-
-
 
     /**
      * Create an empty answer entity or document

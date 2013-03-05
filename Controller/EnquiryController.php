@@ -145,7 +145,7 @@ class EnquiryController extends Controller
     /**
      * Serialize the enquiry object and return it in the format requested.
      *
-     * @param \Bodaclick\BDKEnquiryBundle\Model\Enquiry $enquiry
+     * @param  \Bodaclick\BDKEnquiryBundle\Model\Enquiry  $enquiry
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function buildResponse(Enquiry $enquiry)

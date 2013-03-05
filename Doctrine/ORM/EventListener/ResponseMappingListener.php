@@ -28,8 +28,8 @@ class ResponseMappingListener
      * Constructor
      *
      * @param Response $defaultResponse Default Response base class
-     * @param array $responseClasses Array with data mapping from configuration
-     * @param string $inheritanceType Type of inheritance
+     * @param array    $responseClasses Array with data mapping from configuration
+     * @param string   $inheritanceType Type of inheritance
      */
     public function __construct($defaultResponse, $responseClasses, $inheritanceType)
     {
@@ -77,7 +77,7 @@ class ResponseMappingListener
         //depending on mapping given in configuration
         $builder = new ClassMetadataBuilder($args->getClassMetadata());
 
-        switch($this->inheritanceType) {
+        switch ($this->inheritanceType) {
             case InheritanceTypes::SINGLE:
                 $builder->setSingleTableInheritance();
                 break;
@@ -88,7 +88,7 @@ class ResponseMappingListener
 
         $builder->setDiscriminatorColumn('type');
 
-        foreach($this->responseClasses as $type=>$class) {
+        foreach ($this->responseClasses as $type=>$class) {
             $builder->addDiscriminatorMapClass($type, $class);
         }
 

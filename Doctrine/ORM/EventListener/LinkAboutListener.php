@@ -11,7 +11,6 @@
 
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 

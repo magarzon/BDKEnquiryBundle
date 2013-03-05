@@ -41,7 +41,6 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
      */
     protected $responses;
 
-
     public function __construct()
     {
         $this->responses = new ArrayCollection();
@@ -57,7 +56,6 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
         return $this->id;
     }
 
-
     /**
     * Set user
     *
@@ -67,6 +65,7 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
     public function setUser(UserInterface $user)
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -83,12 +82,13 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
     /**
      * Set enquiry
      *
-     * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface $enquiry
+     * @param  Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface $enquiry
      * @return Answer
      */
     public function setEnquiry(EnquiryInterface $enquiry)
     {
         $this->enquiry = $enquiry;
+
         return $this;
     }
 
@@ -105,12 +105,13 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
     /**
      * Set responses
      *
-     * @param Collection $responses
+     * @param  Collection $responses
      * @return Answer
      */
     public function setResponses(Collection $responses)
     {
         $this->responses = $responses;
+
         return $this;
     }
 
@@ -136,8 +137,8 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
     /**
      * Normalize function used to convert the object in an array of fields
      *
-     * @param \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
-     * @param string| null $format
+     * @param  \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
+     * @param  string| null                                                 $format
      * @return array|\Symfony\Component\Serializer\Normalizer\scalar
      */
     public function normalize(NormalizerInterface $normalizer, $format = null)
@@ -150,7 +151,7 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
 
         $normalized['responses'] = array();
 
-        foreach($this->responses as $response) {
+        foreach ($this->responses as $response) {
             $normalized['responses'][] = $normalizer->normalize($response, $format);
         }
 
@@ -161,8 +162,8 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
      * Denormalize function used to fills the object's fields from an array of key-value pairs
      *
      * @param \Symfony\Component\Serializer\Normalizer\DenormalizerInterface $denormalizer
-     * @param array|\Symfony\Component\Serializer\Normalizer\scalar $data
-     * @param string|null $format
+     * @param array|\Symfony\Component\Serializer\Normalizer\scalar          $data
+     * @param string|null                                                    $format
      */
     public function denormalize(DenormalizerInterface $denormalizer, $data, $format = null)
     {
@@ -173,7 +174,7 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
         $answer = $data['answer'];
 
         if (isset($answer['responses'])) {
-            foreach($answer['responses'] as $response) {
+            foreach ($answer['responses'] as $response) {
                 //The ResponseNormalizer class knows which Response class to use, based on informed type
                 //but we have to use a special 'Response' type to have the Response normalizer treat this
                 $object = $denormalizer->denormalize($response, 'Response', $format);

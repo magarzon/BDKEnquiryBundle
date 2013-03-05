@@ -13,7 +13,6 @@ namespace Bodaclick\BDKEnquiryBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
@@ -114,11 +113,11 @@ class BDKEnquiryExtension extends Extension
     {
         $def = $container->getDefinition($id);
 
-        foreach($arguments as $argument) {
+        foreach ($arguments as $argument) {
             $def->addArgument($argument);
         }
 
-        switch($driver) {
+        switch ($driver) {
             case DriversSupported::ORM:
                 $def->addTag('doctrine.event_listener', array('event'=>'loadClassMetadata'));
                 break;

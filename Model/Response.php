@@ -26,15 +26,15 @@ abstract class Response
     /**
      * Set key
      *
-     * @param string $key
+     * @param  string   $key
      * @return Response
      */
     public function setKey($key)
     {
         $this->key = $key;
+
         return $this;
     }
-
 
     /**
      * Get key
@@ -46,16 +46,16 @@ abstract class Response
         return $this->key;
     }
 
-
     /**
      * Set value
      *
-     * @param string $value
+     * @param  string   $value
      * @return Response
      */
     public function setValue($value)
     {
         $this->value = $value;
+
         return $this;
     }
 
