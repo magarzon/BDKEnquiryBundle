@@ -12,6 +12,11 @@
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\CustomNormalizer;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Bodaclick\BDKEnquiryBundle\Events\Events;
@@ -45,9 +50,15 @@ class EnquiryManager
      * Default Response class, used to build responses if needed.
      * Must be a descendant of Response abstract class in the bundle model.
      *
-     * @var Bodaclick\BDKEnquiryBundle\Model\Response
+     * @var string
      */
     protected $defaultResponseClass;
+
+    /**
+     * List of response classes defined in configuration and used in serialization/deserialization
+     * @var array
+     */
+    protected $responseClasses;
 
     /**
      * Optional logger to log service activity
@@ -65,7 +76,8 @@ class EnquiryManager
     public function __construct(
         ObjectManager $objectManager,
         EventDispatcherInterface $dispatcher,
-        $defaultResponseClass
+        $defaultResponseClass,
+        $responseClasses
     )
     {
         $this->objectManager = $objectManager;
@@ -123,10 +135,17 @@ class EnquiryManager
      * Get an enquiry previously saved with a name
      *
      * @param string $name Name associated to the enquiry
+     * @param string | null $format Format of the response (json, xml). Optional. If null, return db object or null
+     * @return Bodaclick\BDKEnquiryBundle\Model\Enquiry | null
      */
-    public function getEnquiryByName($name)
+    public function getEnquiryByName($name, $format = null)
     {
         $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->findOneBy(array('name'=>$name));
+
+        if ($enquiry!=null && $format!==null) {
+            $serializer = $this->getSerializer();
+            $enquiry = $serializer->serialize($enquiry, $format);
+        }
 
         return $enquiry;
     }
@@ -135,10 +154,17 @@ class EnquiryManager
      * Get an enquiry by id
      *
      * @param $id
+     * @param string | null $format Format of the response (json, xml). Optional. If null, return db object or null
+     * @return Bodaclick\BDKEnquiryBundle\Model\Enquiry | null
      */
-    public function getEnquiry($id)
+    public function getEnquiry($id, $format = null)
     {
         $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->find($id);
+
+        if ($enquiry!=null && $format!==null) {
+            $serializer = $this->getSerializer();
+            $enquiry = $serializer->serialize($enquiry, $format);
+        }
 
         return $enquiry;
     }
@@ -295,39 +321,54 @@ class EnquiryManager
      * The responses come in an array of Response objects
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
-     * @param array                                          $responses Array of Response objects or raw key=>value pair
+     * @param array | string $responses Array of Response objects or raw key=>value pair, or string in json format
      * @param \Symfony\Component\Security\Core\User\UserInterface $user  The user that the answers belongs to. Optional.
      */
-    public function saveResponses($enquiry, array $responses, UserInterface $user=null)
+    public function saveResponses($enquiry, $responses, UserInterface $user=null)
     {
-        //Check the type of the responses, if they are raw key-value pairs, convert into default Response objects
-        //Throw and exception if they are objects of classes not descendant of default Response class
-        $checkFunction = function(&$value, $key, $defaultResponseClass) {
-            if (!is_object($value)) {
-                $response = new $defaultResponseClass;
-                $response->setValue($value);
-                $response->setKey($key);
-                $value = $response;
-            } elseif (!($value instanceof Response)) {
-                throw new \Exception();
-            }
-        };
+        if (is_array($responses)) {
+            //Check the type of the responses, if they are raw key-value pairs, convert into default Response objects
+            //Throw and exception if they are objects of classes not descendant of default Response class
+            $checkFunction = function(&$value, $key, $defaultResponseClass) {
+                if (!is_object($value)) {
+                    $response = new $defaultResponseClass;
+                    $response->setValue($value);
+                    $response->setKey($key);
+                    $value = $response;
+                } elseif (!($value instanceof Response)) {
+                    throw new \Exception();
+                }
+            };
 
-        try {
-            array_walk($responses, $checkFunction, $this->defaultResponseClass);
-        } catch (\Exception $e) {
-            $msg = 'The responses parameter must contain an array of Response objects or key-value pairs';
-            if ($this->logger) {
-                $this->logger->crit($msg);
+            try {
+                array_walk($responses, $checkFunction, $this->defaultResponseClass);
+            } catch (\Exception $e) {
+                $msg = 'The responses parameter must contain an array of Response objects or key-value pairs';
+                if ($this->logger) {
+                    $this->logger->crit($msg);
+                }
+                throw new \InvalidArgumentException($msg);
             }
-            throw new \InvalidArgumentException($msg);
+
+            //Create the answer instance object
+            $answer = $this->createAnswer();
+
+            //Add the responses to the answer instance
+            $answer->setResponses(new ArrayCollection($responses));
+
+        } else {
+            //It's a string representation of the responses in json format
+            //Deserialize the answer
+            $metadata = $this->objectManager->getClassMetadata('BDKEnquiryBundle:Answer');
+            $classname = $metadata->getName();
+            $serializer = $this->getSerializer();
+            $answer = $serializer->deserialize($responses, $classname , 'json');
+
+            //If the answer is null or has no responses, something is bad in the request
+            if ($answer == null || $answer->getResponses()->count()==0) {
+                throw new InvalidArgumentException('The json request is malformed or not valid');
+            }
         }
-
-        //Create the answer instance object
-        $answer = $this->createAnswer();
-
-        //Add the responses to the answer instance
-        $answer->setResponses(new ArrayCollection($responses));
 
         //Call the saveAnswer method with the new answer created
         $this->saveAnswer($enquiry, $answer, $user);
@@ -387,5 +428,18 @@ class EnquiryManager
             );
 
         return $enquiry;
+    }
+
+    /**
+     * Construct a serializer object with the right normalizers and supported encoders
+     * Used to parse the request and serialize the response in the format requested.
+     * @return \Symfony\Component\Serializer\Serializer
+     */
+    protected function getSerializer()
+    {
+        return new Serializer(
+            array(new ResponseNormalizer($this->defaultResponseClass, $this->responseClasses), new CustomNormalizer()),
+            array(new XmlEncoder(), new JsonEncoder())
+        );
     }
 }

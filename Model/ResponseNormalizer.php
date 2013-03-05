@@ -21,18 +21,27 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 class ResponseNormalizer implements NormalizerInterface, DenormalizerInterface
 {
     /**
-     * @var \Symfony\Component\DependencyInjection\ContainerInterface
+     * Default Response class
+     * @var string
      */
-    protected $container;
+    protected $defaultResponseClass;
+
+    /**
+     * List of response classes
+     * @var array
+     */
+    protected $responseClasses;
 
     /**
      * Constructor
      *
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+     * @param $defaultResponseClass
+     * @param $responseClasses
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct($defaultResponseClass, $responseClasses)
     {
-        $this->container = $container;
+        $this->defaultResponseClass = $defaultResponseClass;
+        $this->responseClasses = $responseClasses;
     }
 
     /**
@@ -40,18 +49,20 @@ class ResponseNormalizer implements NormalizerInterface, DenormalizerInterface
      *
      * @param  object       $object object to normalize
      * @param  string       $format format the normalization result will be encoded as
-     * @return array|scalar
+     * @return array
      */
     public function normalize($object, $format = null)
     {
         $normalized = array('key'=>$object->getKey(), 'value'=>$object->getValue());
 
         $class = get_class($object);
-        $default = $this->container->getParameter('bdk.enquiry.default_response_class');
 
-        if ($class!=$default) {
-            $responseClasses = $this->container->getParameter('bdk.enquiry.response_classes');
-            $normalized['type'] = array_search($class, $responseClasses);
+        if ($class!=$this->defaultResponseClass) {;
+            $type = array_search($class, $this->responseClasses);
+            if (!$type) {
+                throw new InvalidArgumentException(sprintf("Response type not valid: %s",$type));
+            }
+            $normalized['type'] = $type;
         }
 
         return $normalized;
@@ -75,7 +86,7 @@ class ResponseNormalizer implements NormalizerInterface, DenormalizerInterface
      * @param  mixed  $data   data to restore
      * @param  string $class  the expected class to instantiate
      * @param  string $format format the given data was extracted from
-     * @return object
+     * @return Response
      */
     public function denormalize($data, $class, $format = null)
     {

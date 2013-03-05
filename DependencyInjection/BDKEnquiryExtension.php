@@ -56,6 +56,9 @@ class BDKEnquiryExtension extends Extension
         $defaultResponse = $defaultResponses['default'];
         $container->setParameter('bdk.enquiry.default_response_class', $defaultResponse);
 
+        //Set the response classes as container parameter
+        $container->setParameter('bdk.enquiry.responses_classes', $responseClasses);
+
         //Only enable the listeners for mapping Response classes if there are more than one
         if (count($defaultResponses) > 1 || !empty($responseClasses)) {
             //Normalize the user custom Response classes array
@@ -82,9 +85,6 @@ class BDKEnquiryExtension extends Extension
 
             //Merge with default Response classes
             $responseClasses = array_merge($defaultResponses, $responseClasses);
-
-            //Set the response classes as container parameter
-            $container->setParameter('bdk.enquiry.responses_classes', $responseClasses);
 
             //Set the listener that configure the response mapping, depending on configuration
             $this->enableListener(
