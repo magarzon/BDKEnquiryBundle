@@ -60,11 +60,11 @@ class EnquiryManager
      * Constructor.
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $objectManager
-     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher Optional dispatcher
+     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher
      */
     public function __construct(
         ObjectManager $objectManager,
-        EventDispatcherInterface $dispatcher=null,
+        EventDispatcherInterface $dispatcher,
         $defaultResponseClass
     )
     {
@@ -191,7 +191,7 @@ class EnquiryManager
         $event = new EnquiryEvent($enquiry);
 
         //Dispatch event before persist object, and get the $enquiry object, in case the listener change it
-        $this->dispatchEvent(Events::PRE_PERSIST, $event);
+        $this->dispatcher->dispatch(Events::PRE_PERSIST, $event);
 
         $enquiry = $event->getEnquiry();
 
@@ -200,7 +200,7 @@ class EnquiryManager
         $this->objectManager->flush();
 
         //Dispatch event to inform object is persisted
-        $this->dispatchEvent(Events::POST_PERSIST, $event);
+        $this->dispatcher->dispatch(Events::POST_PERSIST, $event);
 
         if ($this->logger) {
             $this->logger->info(
@@ -230,13 +230,13 @@ class EnquiryManager
         $event = new EnquiryEvent($enquiry);
 
         //Dispatch event to inform object is to be removed
-        $this->dispatchEvent(Events::PRE_REMOVE, $event);
+        $this->dispatcher->dispatch(Events::PRE_REMOVE, $event);
 
         $this->objectManager->remove($enquiry);
         $this->objectManager->flush();
 
         //Dispatch event to inform object has removed
-        $this->dispatchEvent(Events::POST_REMOVE, $event);
+        $this->dispatcher->dispatch(Events::POST_REMOVE, $event);
 
         if ($this->logger) {
             $this->logger->info(sprintf('Enquiry %s removed', $enquiry->getName()));
@@ -269,7 +269,7 @@ class EnquiryManager
         //Dispatch event and get the $enquiry object, in case the listener change it
         $event = new EnquiryEvent($enquiry);
 
-        $this->dispatchEvent(Events::PRE_PERSIST_ANSWER, $event);
+        $this->dispatcher->dispatch(Events::PRE_PERSIST_ANSWER, $event);
 
         $enquiry = $event->getEnquiry();
 
@@ -278,7 +278,7 @@ class EnquiryManager
         $this->objectManager->flush();
 
         //Dispatch event to inform object has persisted
-        $this->dispatchEvent(Events::POST_PERSIST_ANSWER, $event);
+        $this->dispatcher->dispatch(Events::POST_PERSIST_ANSWER, $event);
 
         if ($this->logger) {
             if ($user) {
@@ -394,18 +394,5 @@ class EnquiryManager
             );
 
         return $enquiry;
-    }
-
-    /**
-     * Dispatch the event if there is a dispatcher available
-     *
-     * @param string $name Event's name
-     * @param \Symfony\Component\EventDispatcher\Event $event Event to dispatch
-     */
-    protected function dispatchEvent($name, Event $event)
-    {
-        if ($this->dispatcher) {
-            $this->dispatcher->dispatch($name, $event);
-        }
     }
 }

@@ -32,7 +32,9 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnCallback(array($this, 'createClassMetadata')));
 
 
-        $this->enquiryManager = $this->createEnquiryManager($this->objectManager);
+        $dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcher');
+        $defaultClass = 'Bodaclick\BDKEnquiryBundle\Model\Response';
+        $this->enquiryManager = $this->createEnquiryManager($this->objectManager, $dispatcher, $defaultClass );
     }
 
     public function testSaveEnquiry()
@@ -68,9 +70,9 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(1, $enquiries);
     }
 
-    protected function createEnquiryManager($objectManager)
+    protected function createEnquiryManager($objectManager, $dispatcher, $defaultClass)
     {
-        return new EnquiryManager($objectManager);
+        return new EnquiryManager($objectManager, $dispatcher, $defaultClass );
     }
 
     public function createClassMetadata($classname)
