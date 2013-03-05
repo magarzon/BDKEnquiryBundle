@@ -12,6 +12,7 @@
 namespace Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
 /**
@@ -40,6 +41,15 @@ class LinkAboutListener
             //Change the about object by its definition
             $enquiry->setAbout($definition);
         }
+    }
+
+    public function preUpdate(PreUpdateEventArgs $event)
+    {
+        if ($event->getEntity() instanceof \Bodaclick\BDKEnquiryBundle\Entity\Enquiry) {
+            //The about object is inmutable, so undo changes to that field in updates
+            $event->setNewValue('about',$event->getOldValue('about'));
+        }
+
     }
 
     public function postLoad(LifecycleEventArgs $event)
