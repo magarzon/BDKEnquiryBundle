@@ -52,6 +52,13 @@ class BDKEnquiryExtension extends Extension
             throw new \LogicException('No default Response class defined in bundle configuration');
         }
 
+        //Set the default Response class (key exist, it's checked above)
+        $defaultResponse = $defaultResponses['default'];
+        $container->setParameter('bdk.enquiry.default_response_class', $defaultResponse);
+
+        //Set the response classes as container parameter
+        $container->setParameter('bdk.enquiry.responses_classes', $responseClasses);
+
         //Only enable the listeners for mapping Response classes if there are more than one
         if (count($defaultResponses) > 1 || !empty($responseClasses)) {
             //Normalize the user custom Response classes array
@@ -73,8 +80,7 @@ class BDKEnquiryExtension extends Extension
                 );
             }
 
-            //Set the default Response class (key exist, it's checked above)
-            $defaultResponse = $defaultResponses['default'];
+            //Unset the default one
             unset($defaultResponses['default']);
 
             //Merge with default Response classes

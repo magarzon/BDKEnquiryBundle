@@ -12,6 +12,12 @@
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\CustomNormalizer;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Bodaclick\BDKEnquiryBundle\Events\Events;
 use Symfony\Component\EventDispatcher\Event;
@@ -41,6 +47,20 @@ class EnquiryManager
     protected $dispatcher;
 
     /**
+     * Default Response class, used to build responses if needed.
+     * Must be a descendant of Response abstract class in the bundle model.
+     *
+     * @var string
+     */
+    protected $defaultResponseClass;
+
+    /**
+     * List of response classes defined in configuration and used in serialization/deserialization
+     * @var array
+     */
+    protected $responseClasses;
+
+    /**
      * Optional logger to log service activity
      *
      * @var LoggerInterface $logger
@@ -51,12 +71,18 @@ class EnquiryManager
      * Constructor.
      *
      * @param \Doctrine\Common\Persistence\ObjectManager        $objectManager
-     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher    Optional dispatcher
+     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher
      */
-    public function __construct(ObjectManager $objectManager, EventDispatcherInterface $dispatcher)
+    public function __construct(
+        ObjectManager $objectManager,
+        EventDispatcherInterface $dispatcher,
+        $defaultResponseClass,
+        $responseClasses
+    )
     {
         $this->objectManager = $objectManager;
         $this->dispatcher = $dispatcher;
+        $this->defaultResponseClass = $defaultResponseClass;
     }
 
     /**
@@ -109,10 +135,36 @@ class EnquiryManager
      * Get an enquiry previously saved with a name
      *
      * @param string $name Name associated to the enquiry
+     * @param string | null $format Format of the response (json, xml). Optional. If null, return db object or null
+     * @return Bodaclick\BDKEnquiryBundle\Model\Enquiry | null
      */
-    public function getEnquiryByName($name)
+    public function getEnquiryByName($name, $format = null)
     {
         $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->findOneBy(array('name'=>$name));
+
+        if ($enquiry!=null && $format!==null) {
+            $serializer = $this->getSerializer();
+            $enquiry = $serializer->serialize($enquiry, $format);
+        }
+
+        return $enquiry;
+    }
+
+    /**
+     * Get an enquiry by id
+     *
+     * @param $id
+     * @param string | null $format Format of the response (json, xml). Optional. If null, return db object or null
+     * @return Bodaclick\BDKEnquiryBundle\Model\Enquiry | null
+     */
+    public function getEnquiry($id, $format = null)
+    {
+        $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->find($id);
+
+        if ($enquiry!=null && $format!==null) {
+            $serializer = $this->getSerializer();
+            $enquiry = $serializer->serialize($enquiry, $format);
+        }
 
         return $enquiry;
     }
@@ -166,7 +218,7 @@ class EnquiryManager
         $event = new EnquiryEvent($enquiry);
 
         //Dispatch event before persist object, and get the $enquiry object, in case the listener change it
-        $this->dispatchEvent(Events::PRE_PERSIST, $event);
+        $this->dispatcher->dispatch(Events::PRE_PERSIST, $event);
 
         $enquiry = $event->getEnquiry();
 
@@ -175,7 +227,7 @@ class EnquiryManager
         $this->objectManager->flush();
 
         //Dispatch event to inform object is persisted
-        $this->dispatchEvent(Events::POST_PERSIST, $event);
+        $this->dispatcher->dispatch(Events::POST_PERSIST, $event);
 
         if ($this->logger) {
             $this->logger->info(
@@ -204,14 +256,8 @@ class EnquiryManager
 
         $event = new EnquiryEvent($enquiry);
 
-        //Dispatch event to inform object is to be removed
-        $this->dispatchEvent(Events::PRE_REMOVE, $event);
-
         $this->objectManager->remove($enquiry);
         $this->objectManager->flush();
-
-        //Dispatch event to inform object has removed
-        $this->dispatchEvent(Events::POST_REMOVE, $event);
 
         if ($this->logger) {
             $this->logger->info(sprintf('Enquiry %s removed', $enquiry->getName()));
@@ -221,26 +267,30 @@ class EnquiryManager
     /**
      * Save the answers to an enquiry to the database.
      * The enquiry can be specified by its database object representation or by name
+     * The responses come in an array of Response objects
      *
      * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
-     * @param Bodaclick\BDKEnquiryBundle\Model\Answer             $answer An answer object containing the responses given
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user   The user that the answers belongs to.
+     * @param Bodaclick\BDKEnquiryBundle\Model\Answer            $answer An answer object containing the responses given
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user  The user that the answers belongs to. Optional.
      */
-    public function saveAnswer($enquiry, Answer $answer, UserInterface $user)
+    public function saveAnswer($enquiry, Answer $answer, UserInterface $user = null)
     {
 
         //Get the actual database enquiry object, if name is specified in the param
         $enquiry = $this->resolveEnquiryParam($enquiry);
 
-        //Associate the answers
+        //Associate the answer to the enquiry
         $enquiry->addAnswer($answer);
 
-        $answer->setUser($user);
-
-        $event = new EnquiryEvent($enquiry);
+        //Associate the user if any
+        if ($user!=null) {
+            $answer->setUser($user);
+        }
 
         //Dispatch event and get the $enquiry object, in case the listener change it
-        $this->dispatchEvent(Events::PRE_PERSIST_ANSWER, $event);
+        $event = new EnquiryEvent($enquiry);
+
+        $this->dispatcher->dispatch(Events::PRE_PERSIST_ANSWER, $event);
 
         $enquiry = $event->getEnquiry();
 
@@ -249,17 +299,79 @@ class EnquiryManager
         $this->objectManager->flush();
 
         //Dispatch event to inform object has persisted
-        $this->dispatchEvent(Events::POST_PERSIST_ANSWER, $event);
+        $this->dispatcher->dispatch(Events::POST_PERSIST_ANSWER, $event);
 
         if ($this->logger) {
-            $this->logger->info(
-                sprintf(
+            if ($user) {
+                $msg = sprintf(
                     'Answer from user %s to enquiry %s saved',
                     $user->getUsername(),
                     $enquiry->getName()
-                )
-            );
+                );
+            } else {
+                $msg = sprintf('Answer from anonymous user to enquiry %s saved', $enquiry->getName());
+            }
+            $this->logger->info($msg);
         }
+    }
+
+    /**
+     * Save the responses to an enquiry to the database.
+     * The enquiry can be specified by its database object representation or by name
+     * The responses come in an array of Response objects
+     *
+     * @param Bodaclick\BDKEnquiryBundle\Model\EnquiryInterface | string The enquiry object or the name of the enquiry
+     * @param array | string $responses Array of Response objects or raw key=>value pair, or string in json format
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user  The user that the answers belongs to. Optional.
+     */
+    public function saveResponses($enquiry, $responses, UserInterface $user=null)
+    {
+        if (is_array($responses)) {
+            //Check the type of the responses, if they are raw key-value pairs, convert into default Response objects
+            //Throw and exception if they are objects of classes not descendant of default Response class
+            $checkFunction = function(&$value, $key, $defaultResponseClass) {
+                if (!is_object($value)) {
+                    $response = new $defaultResponseClass;
+                    $response->setValue($value);
+                    $response->setKey($key);
+                    $value = $response;
+                } elseif (!($value instanceof Response)) {
+                    throw new \Exception();
+                }
+            };
+
+            try {
+                array_walk($responses, $checkFunction, $this->defaultResponseClass);
+            } catch (\Exception $e) {
+                $msg = 'The responses parameter must contain an array of Response objects or key-value pairs';
+                if ($this->logger) {
+                    $this->logger->crit($msg);
+                }
+                throw new \InvalidArgumentException($msg);
+            }
+
+            //Create the answer instance object
+            $answer = $this->createAnswer();
+
+            //Add the responses to the answer instance
+            $answer->setResponses(new ArrayCollection($responses));
+
+        } else {
+            //It's a string representation of the responses in json format
+            //Deserialize the answer
+            $metadata = $this->objectManager->getClassMetadata('BDKEnquiryBundle:Answer');
+            $classname = $metadata->getName();
+            $serializer = $this->getSerializer();
+            $answer = $serializer->deserialize($responses, $classname , 'json');
+
+            //If the answer is null or has no responses, something is bad in the request
+            if ($answer == null || $answer->getResponses()->count()==0) {
+                throw new InvalidArgumentException('The json request is malformed or not valid');
+            }
+        }
+
+        //Call the saveAnswer method with the new answer created
+        $this->saveAnswer($enquiry, $answer, $user);
     }
 
     /**
@@ -282,10 +394,7 @@ class EnquiryManager
      */
     public function createResponse()
     {
-        $metadata = $this->objectManager->getClassMetadata('BDKEnquiryBundle:Response');
-        $response = $metadata->getReflectionClass()->newInstance();
-
-        return $response;
+        return new $this->defaultResponseClass;
     }
 
     /**
@@ -322,15 +431,15 @@ class EnquiryManager
     }
 
     /**
-     * Dispatch the event if there is a dispatcher available
-     *
-     * @param string                                   $name  Event's name
-     * @param \Symfony\Component\EventDispatcher\Event $event Event to dispatch
+     * Construct a serializer object with the right normalizers and supported encoders
+     * Used to parse the request and serialize the response in the format requested.
+     * @return \Symfony\Component\Serializer\Serializer
      */
-    protected function dispatchEvent($name, Event $event)
+    protected function getSerializer()
     {
-        if ($this->dispatcher) {
-            $this->dispatcher->dispatch($name, $event);
-        }
+        return new Serializer(
+            array(new ResponseNormalizer($this->defaultResponseClass, $this->responseClasses), new CustomNormalizer()),
+            array(new XmlEncoder(), new JsonEncoder())
+        );
     }
 }

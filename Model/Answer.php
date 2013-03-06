@@ -12,10 +12,14 @@
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizableInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizableInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
-abstract class Answer
+abstract class Answer implements NormalizableInterface, DenormalizableInterface
 {
     /**
      * @var integer
@@ -128,5 +132,54 @@ abstract class Answer
     public function addResponse(Response $response)
     {
         $this->responses->add($response);
+    }
+
+    /**
+     * Normalize function used to convert the object in an array of fields
+     *
+     * @param  \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
+     * @param  string| null                                                 $format
+     * @return array|\Symfony\Component\Serializer\Normalizer\scalar
+     */
+    public function normalize(NormalizerInterface $normalizer, $format = null)
+    {
+        $normalized = array();
+
+        if ($this->user!=null) {
+            $normalized['user'] = array('id'=>$this->user->getId(), 'username'=>$this->user->getUsername());
+        }
+
+        $normalized['responses'] = array();
+
+        foreach ($this->responses as $response) {
+            $normalized['responses'][] = $normalizer->normalize($response, $format);
+        }
+
+        return array('answer'=>$normalized);
+    }
+
+    /**
+     * Denormalize function used to fills the object's fields from an array of key-value pairs
+     *
+     * @param \Symfony\Component\Serializer\Normalizer\DenormalizerInterface $denormalizer
+     * @param array|\Symfony\Component\Serializer\Normalizer\scalar          $data
+     * @param string|null                                                    $format
+     */
+    public function denormalize(DenormalizerInterface $denormalizer, $data, $format = null)
+    {
+        if (!isset($data['answer'])) {
+            return null;
+        }
+
+        $answer = $data['answer'];
+
+        if (isset($answer['responses'])) {
+            foreach ($answer['responses'] as $response) {
+                //The ResponseNormalizer class knows which Response class to use, based on informed type
+                //but we have to use a special 'Response' type to have the Response normalizer treat this
+                $object = $denormalizer->denormalize($response, 'Response', $format);
+                $this->addResponse($object);
+            }
+        }
     }
 }
