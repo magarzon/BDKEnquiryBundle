@@ -31,7 +31,7 @@ class EnquiryRepository extends EntityRepository implements EnquiryRepositoryInt
     {
         //Generate the definition and find using the string generated
         $metadata = $this->getEntityManager()->getClassMetadata(get_class($object));
-        $definition = json_encode(array("className"=>$metadata->getName(), "ids"=>$metadata->getIdentifierValues($about)));
+        $definition = json_encode(array("className"=>$metadata->getName(), "ids"=>$metadata->getIdentifierValues($object)));
 
         //Order from newer to older, so if we get the first one, we get the last enquiry saved
         $qb=$this->createQueryBuilder('e')
