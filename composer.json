@@ -14,6 +14,7 @@
     "require-dev": {
     	"doctrine/doctrine-bundle": "*",
     	"doctrine/mongodb-odm-bundle": "3.0.*",
+        "doctrine/mongodb-odm": ">=1.0.0-beta5,<1.1-dev",
     	"doctrine/orm": ">=2.2.3,<2.4-dev"
     },
     
