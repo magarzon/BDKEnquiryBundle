@@ -83,6 +83,7 @@ class EnquiryManager
         $this->objectManager = $objectManager;
         $this->dispatcher = $dispatcher;
         $this->defaultResponseClass = $defaultResponseClass;
+        $this->responseClasses = $responseClasses;
     }
 
     /**
@@ -99,34 +100,47 @@ class EnquiryManager
      * Get the last enquiry associated to an object
      *
      * @param AboutInterface $object
+     * @param string | null $format Format of the response (json, xml). Optional. If null, return db object or null
      */
-    public function getEnquiryFor(AboutInterface $object)
+    public function getEnquiryFor(AboutInterface $object, $format = null)
     {
         $enquiries = $this->getEnquiriesFor($object);
 
         if (is_array($enquiries)) {
-            return array_pop($enquiries);
+            $enquiry = array_pop($enquiries);
         } elseif ($enquiries instanceof \Iterator) {
             $enquiries->next();
 
-            return $enquiries->current();
+            $enquiry = $enquiries->current();
         } else {
             throw new \UnexpectedValueException(
                 'EnquiryRepository method must return an array or object implementing Iterator interface'
             );
         }
+
+        return $this->getEnquiryFormatted($enquiry, $format);
     }
 
     /**
      * Get all the enquiries previously associated to an object
      *
      * @param AboutInterface $object
+     * @param string | null $format Format of the response (json, xml). Optional. If null, return db object or null
      */
-    public function getEnquiriesFor(AboutInterface $object)
+    public function getEnquiriesFor(AboutInterface $object, $format = null)
     {
         //A custom repository is used, so each type of database driver (orm, mongodb,...)
         //can build the most eficient query
         $enquiries = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->getEnquiriesFor($object);
+
+        if ($format!==null) {
+            $result = '[';
+            foreach ($enquiries as $enquiry) {
+                $result .= $this->getEnquiryFormatted($enquiry, $format);
+            }
+            $result .= ']';
+            return $result;
+        }
 
         return $enquiries;
     }
@@ -142,12 +156,7 @@ class EnquiryManager
     {
         $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->findOneBy(array('name'=>$name));
 
-        if ($enquiry!=null && $format!==null) {
-            $serializer = $this->getSerializer();
-            $enquiry = $serializer->serialize($enquiry, $format);
-        }
-
-        return $enquiry;
+        return $this->getEnquiryFormatted($enquiry, $format);
     }
 
     /**
@@ -161,6 +170,18 @@ class EnquiryManager
     {
         $enquiry = $this->objectManager->getRepository('BDKEnquiryBundle:Enquiry')->find($id);
 
+        return $this->getEnquiryFormatted($enquiry, $format);
+    }
+
+    /**
+     * Get an enquiry object formatted according to the format specified
+     *
+     * @param Enquiry $enquiry Enquiry object
+     * @param null $format Format, json or xml, or null
+     * @return Enquiry|null
+     */
+    protected function getEnquiryFormatted(Enquiry $enquiry = null, $format = null)
+    {
         if ($enquiry!=null && $format!==null) {
             $serializer = $this->getSerializer();
             $enquiry = $serializer->serialize($enquiry, $format);
@@ -253,8 +274,6 @@ class EnquiryManager
     {
         //Get the actual database enquiry object, if name is specified in the param
         $enquiry = $this->resolveEnquiryParam($enquiry);
-
-        $event = new EnquiryEvent($enquiry);
 
         $this->objectManager->remove($enquiry);
         $this->objectManager->flush();

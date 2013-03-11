@@ -14,7 +14,6 @@ namespace Bodaclick\BDKEnquiryBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**

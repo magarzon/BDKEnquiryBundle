@@ -48,7 +48,6 @@ class ResponseMappingListenerTest extends \PHPUnit_Framework_TestCase
 
         $this->event = new \Doctrine\ORM\Event\LoadClassMetadataEventArgs($this->metadata, $this->entityManager);
 
-
     }
 
     public function testLoadClassMetadataWithMultipleResponses()
@@ -66,7 +65,6 @@ class ResponseMappingListenerTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('other'), $this->equalTo('OtherResponse'));
 
         $listener->loadClassMetadata($this->event);
-
 
     }
 
