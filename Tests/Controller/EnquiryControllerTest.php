@@ -11,15 +11,16 @@
 
 namespace Bodaclick\BDKEnquiryBundle\Tests\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Bodaclick\BDKEnquiryBundle\Model\EnquiryManager;
+use Symfony\Component\HttpFoundation\Request;
 
-class EnquiryControllerTest extends WebTestCase
+class EnquiryControllerTest extends \PHPUnit_Framework_TestCase
 {
     protected $enquiryManager;
     protected $objectManager;
     protected $enquiry;
     protected $json;
+    protected $controller;
 
     public function setUp()
     {
@@ -42,28 +43,24 @@ class EnquiryControllerTest extends WebTestCase
         $defaultClass = get_class($answer->getResponses()->first());
         $this->enquiryManager = new EnquiryManager($this->objectManager, $dispatcher, $defaultClass , array() );
 
+        $this->controller = new \Bodaclick\BDKEnquiryBundle\Controller\EnquiryController(
+            $this->enquiryManager,
+            $this->getMockForAbstractClass('Symfony\Component\Security\Core\SecurityContextInterface')
+        );
+
     }
 
     public function testGetEnquiry()
     {
         $this->setUpObjectRepository();
 
-        $client = static::createClient();
+        $response = $this->controller->getEnquiryAction(1, Request::create('/enquiry/1', 'GET', array('_format'=>'json')));
 
-        $container = $client->getContainer();
-
-        //Change the service to mock access to the database
-        $container->set('bdk.enquiry.manager', $this->enquiryManager);
-
-        $client->request('GET', '/enquiry/id');
-
-        $content = $client->getResponse()->getContent();
-
-        $this->assertJsonStringEqualsJsonString($this->json, $content);
+        $this->assertJsonStringEqualsJsonString($this->json, $response->getContent());
 
         // Assert that the "Content-Type" header is "application/json"
         $this->assertTrue(
-            $client->getResponse()->headers->contains(
+            $response->headers->contains(
                 'Content-Type',
                 'application/json'
             )
@@ -74,22 +71,16 @@ class EnquiryControllerTest extends WebTestCase
     {
         $this->setUpObjectRepository();
 
-        $client = static::createClient();
+        $response = $this->controller->getEnquiryByNameAction(
+            'name',
+            Request::create('/enquiry/by_name/name', 'GET', array('_format'=>'json'))
+        );
 
-        $container = $client->getContainer();
-
-        //Change the service to mock access to the database
-        $container->set('bdk.enquiry.manager', $this->enquiryManager);
-
-        $client->request('GET', '/enquiry/by_name/name');
-
-        $content = $client->getResponse()->getContent();
-
-        $this->assertJsonStringEqualsJsonString($this->json, $content);
+        $this->assertJsonStringEqualsJsonString($this->json, $response->getContent());
 
         // Assert that the "Content-Type" header is "application/json"
         $this->assertTrue(
-            $client->getResponse()->headers->contains(
+            $response->headers->contains(
                 'Content-Type',
                 'application/json'
             )
@@ -100,35 +91,31 @@ class EnquiryControllerTest extends WebTestCase
     {
         $this->setUpObjectRepository();
 
-        $client = static::createClient();
-
-        $container = $client->getContainer();
-
-        //Change the service to mock access to the database
-        $container->set('bdk.enquiry.manager', $this->enquiryManager);
 
         $responses = '{"answer":{"responses":[{"key":"test","value":"test"}]}}';
 
-        $client->request(
-            'POST',
-            '/answer/save/enquiryId',
-            array(),
-            array(),
-            array('CONTENT_TYPE'=> 'application/json'),
-            $responses
+        $response = $this->controller->saveAnswerAction(
+            1,
+            Request::create(
+                '/answer/save/1',
+                'POST',
+                array('_format'=>'json'),
+                array(),
+                array(),
+                array('CONTENT_TYPE'=> 'application/json'),
+                $responses
+            )
         );
 
         // Assert that the "Content-Type" header is "application/json"
         $this->assertTrue(
-            $client->getResponse()->headers->contains(
+            $response->headers->contains(
                 'Content-Type',
                 'application/json'
             )
         );
 
-        $content = $client->getResponse()->getContent();
-
-        $this->assertEmpty($content);
+        $this->assertEmpty($response->getContent());
 
     }
 
