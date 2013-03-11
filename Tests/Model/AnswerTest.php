@@ -11,7 +11,7 @@ class AnswerTest extends \PHPUnit_Framework_TestCase
         $this->answer = $this->getMockBuilder('Bodaclick\BDKEnquiryBundle\Model\Answer')
                              ->getMockForAbstractClass();
 
-        $user = $this->getMock('Symfony\Component\Security\Core\User\UserInterface');
+        $user = $this->getMockForAbstractClass('Symfony\Component\Security\Core\User\UserInterface');
 
         $user->expects($this->any())
             ->method('getUsername')

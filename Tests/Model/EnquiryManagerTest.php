@@ -107,7 +107,7 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testSaveAnswer()
     {
-        $user = $this->getMock('Symfony\Component\Security\Core\User\UserInterface');
+        $user = $this->getMockForAbstractClass('Symfony\Component\Security\Core\User\UserInterface');
         $answer = $this->createAnswer();
 
         $this->objectManager->expects($this->once())->method('persist')->with($this->equalTo($this->enquiry));
@@ -123,7 +123,7 @@ class EnquiryManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->setUpObjectRepository();
 
-        $user = $this->getMock('Symfony\Component\Security\Core\User\UserInterface');
+        $user = $this->getMockForAbstractClass('Symfony\Component\Security\Core\User\UserInterface');
         $answer = $this->createAnswer();
 
         $this->objectManager->expects($this->once())->method('persist')->with($this->equalTo($this->enquiry));
