@@ -12,7 +12,7 @@
 namespace Bodaclick\BDKEnquiryBundle\Model;
 
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 /**
@@ -47,8 +47,8 @@ class ResponseNormalizer implements NormalizerInterface, DenormalizerInterface
     /**
      * Normalizes an object into a set of arrays/scalars
      *
-     * @param  object       $object object to normalize
-     * @param  string       $format format the normalization result will be encoded as
+     * @param  object $object object to normalize
+     * @param  string $format format the normalization result will be encoded as
      * @return array
      */
     public function normalize($object, $format = null)
@@ -83,27 +83,26 @@ class ResponseNormalizer implements NormalizerInterface, DenormalizerInterface
     /**
      * Denormalizes data back into an object of the given class
      *
-     * @param  mixed  $data   data to restore
-     * @param  string $class  the expected class to instantiate
-     * @param  string $format format the given data was extracted from
+     * @param  mixed    $data   data to restore
+     * @param  string   $class  the expected class to instantiate
+     * @param  string   $format format the given data was extracted from
      * @return Response
      */
     public function denormalize($data, $class, $format = null)
     {
         if (!isset($data['type']) || $data['type']=='default') {
-            $class = $this->container->getParameter('bdk.enquiry.default_response_class');
+            $class = $this->defaultResponseClass;
         } else {
             $type = $data['type'];
-            $responseClasses = $this->container->getParameter('bdk.enquiry.response_classes');
-            if (!isset($responseClasses[$type])) {
+            if (!isset($this->responseClasses[$type])) {
                 throw new \Symfony\Component\Serializer\Exception\UnexpectedValueException(
                     sprintf('Response type not defined denormalizing response data: %s', $type)
                 );
             }
-            $class = $responseClasses[$type];
+            $class = $this->responseClasses[$type];
         }
 
-        $object = new $class;
+        $object = $this->createResponseClass($class);
         if (isset($data['key'])) {
             $object->setKey($data['key']);
         }
@@ -127,5 +126,15 @@ class ResponseNormalizer implements NormalizerInterface, DenormalizerInterface
     {
         //We use a special type to check support, later in denormalize method is changed to the right class
         return $type=='Response';
+    }
+
+    /**
+     * Method used to create an instance of the class name given. Used in this way so it can be mocked in testing.
+     * @param $class
+     * @return mixed
+     */
+    protected function createResponseClass($class)
+    {
+        return new $class;
     }
 }

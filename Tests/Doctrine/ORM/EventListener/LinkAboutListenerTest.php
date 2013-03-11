@@ -45,7 +45,6 @@ class LinkAboutListenerTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('About'),$this->equalTo(array('id'=>1)))
             ->will($this->returnValue($aboutMock));
 
-
         $this->listener = new \Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener\LinkAboutListener();
     }
 

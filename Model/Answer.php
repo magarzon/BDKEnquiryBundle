@@ -146,7 +146,8 @@ abstract class Answer implements NormalizableInterface, DenormalizableInterface
         $normalized = array();
 
         if ($this->user!=null) {
-            $normalized['user'] = array('id'=>$this->user->getId(), 'username'=>$this->user->getUsername());
+            $id = method_exists($this->user, 'getId')? $this->user->getId() : 'none';
+            $normalized['user'] = array('id'=>$id, 'username'=>$this->user->getUsername());
         }
 
         $normalized['responses'] = array();

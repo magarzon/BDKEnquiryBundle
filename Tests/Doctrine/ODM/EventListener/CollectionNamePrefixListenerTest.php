@@ -9,11 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Bodaclick\BDKEnquiryBundle\Tests\Doctrine\ORM\EventListener;
+namespace Bodaclick\BDKEnquiryBundle\Tests\Doctrine\ODM\EventListener;
 
-class TableNamePrefixListenerTest extends \PHPUnit_Framework_TestCase
+use Bodaclick\BDKEnquiryBundle\Doctrine\ODM\MongoDB\EventListener\CollectionNamePrefixListener;
+use Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs;
+
+class CollectionNamePrefixListenerTest extends \PHPUnit_Framework_TestCase
 {
-    protected $entityManager;
+    protected $documentManager;
     protected $event;
     protected $metadata;
     protected $listener;
@@ -21,16 +24,16 @@ class TableNamePrefixListenerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->entityManager = $this->getMockBuilder('Doctrine\ORM\EntityManager')
+        $this->documentManager = $this->getMockBuilder('Doctrine\ODM\MongoDB\DocumentManager')
                                     ->disableOriginalConstructor()
                                     ->getMock();
 
-        $this->metadata = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadata')
+        $this->metadata = $this->getMockBuilder('Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo')
                                 ->disableOriginalConstructor()
                                 ->setMethods(array('getReflectionClass'))
                                 ->getMock();
 
-        $this->metadata->table = array('name'=>'Test');
+        $this->metadata->collection ='Test';
 
         $this->reflectionClass = $this->getMockBuilder('\ReflectionClass')
             ->disableOriginalConstructor()
@@ -40,9 +43,9 @@ class TableNamePrefixListenerTest extends \PHPUnit_Framework_TestCase
             ->method('getReflectionClass')
             ->will($this->returnValue($this->reflectionClass));
 
-        $this->event = new \Doctrine\ORM\Event\LoadClassMetadataEventArgs($this->metadata, $this->entityManager);
+        $this->event = new LoadClassMetadataEventArgs($this->metadata, $this->documentManager);
 
-        $this->listener = new \Bodaclick\BDKEnquiryBundle\Doctrine\ORM\EventListener\TableNamePrefixListener('prefix');
+        $this->listener = new CollectionNamePrefixListener('prefix');
 
     }
 
@@ -50,11 +53,11 @@ class TableNamePrefixListenerTest extends \PHPUnit_Framework_TestCase
     {
         $this->reflectionClass->expects($this->any())
             ->method('getNamespaceName')
-            ->will($this->returnValue('Bodaclick\BDKEnquiryBundle\Entity'));
+            ->will($this->returnValue('Bodaclick\BDKEnquiryBundle\Document'));
 
         $this->listener->loadClassMetadata($this->event);
 
-        $this->assertEquals($this->metadata->getTableName(), 'prefixTest');
+        $this->assertEquals($this->metadata->getCollection(), 'prefixTest');
     }
 
     public function testLoadClassMetadataWithClassNotInTheNamespace()
@@ -66,7 +69,7 @@ class TableNamePrefixListenerTest extends \PHPUnit_Framework_TestCase
         $this->listener->loadClassMetadata($this->event);
 
         //The name remains untouched
-        $this->assertEquals($this->metadata->getTableName(), 'Test');
+        $this->assertEquals($this->metadata->getCollection(), 'Test');
     }
 
 }
