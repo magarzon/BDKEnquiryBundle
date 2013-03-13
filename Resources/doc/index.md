@@ -11,12 +11,12 @@ The bundle requires Symfony 2.1+
 Installation
 ------------
 
-See installation instructions [here](https://github.com/Bodaclick/FOSUserBundle/blob/dev/Resources/doc/install.md)
+See installation instructions [here](https://github.com/Bodaclick/BDKEnquiryBundle/blob/dev/Resources/doc/install.md)
 
 Configuration Reference
 -----------------------
 
-See configuration reference [here](https://github.com/Bodaclick/FOSUserBundle/blob/dev/Resources/doc/configuration.md)
+See configuration reference [here](https://github.com/Bodaclick/BDKEnquiryBundle/blob/dev/Resources/doc/configuration.md)
 
 Usage
 -----
@@ -39,7 +39,7 @@ your own default *Response* class, you must extends `Bodaclick\BDKEnquiryBundle\
 redefine bdk.response_mapping.default parameter.
 
 If you want to use a set of *Response* classes, all of them must extends the default one, and be configured in
-configuration (see [configuration reference](https://github.com/Bodaclick/FOSUserBundle/blob/dev/Resources/doc/configuration.md)).
+configuration (see [configuration reference](https://github.com/Bodaclick/BDKEnquiryBundle/blob/dev/Resources/doc/configuration.md)).
 If you're usin ORM, you can configure if all the responses are stored in the same table (single inheritance) or each
 type in its own table (joined inheritance).
 
@@ -125,7 +125,7 @@ The bundle provide also a controller to handle two of the basic actions: get an 
 
 The creation of an enquiry only can be made through the service, as an *about* object must be specified.
 
-To use the controller you must add the routing configuration, as stated in the [installation instructions](https://github.com/Bodaclick/FOSUserBundle/blob/dev/Resources/doc/install.md).
+To use the controller you must add the routing configuration, as stated in the [installation instructions](https://github.com/Bodaclick/BDKEnquiryBundle/blob/dev/Resources/doc/install.md).
 
 There are trhee actions available:
 

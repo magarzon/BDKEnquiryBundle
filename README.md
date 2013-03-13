@@ -8,14 +8,14 @@ Documentation
 
 The bulk of the documentation is stored in the `Resources/doc/index.md` file in this bundle:
 
-[Read the Documentation](https://github.com/Bodaclick/FOSUserBundle/blob/dev/Resources/doc/index.md).
+[Read the Documentation](https://github.com/Bodaclick/BDKEnquiryBundle/blob/dev/Resources/doc/index.md).
 
 Installation
 ------------
 
 Installation instructions are located in the `Resources/doc/install.md` file in this bundle:
 
-[Read installation instructions](https://github.com/Bodaclick/FOSUserBundle/blob/dev/Resources/doc/install.md).
+[Read installation instructions](https://github.com/Bodaclick/BDKEnquiryBundle/blob/dev/Resources/doc/install.md).
 
 License
 -------
