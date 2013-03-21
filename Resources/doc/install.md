@@ -53,7 +53,7 @@ bdk_enquiry:
 ```
 
 Only this two configuration values are required.
-See [Configuration Reference](https://github.com/Bodaclick/FOSUserBundle/blob/dev/Resources/doc/configuration.md)
+See [Configuration Reference](https://github.com/Bodaclick/BDKEnquiryBundle/blob/dev/Resources/doc/configuration.md)
 for a list of all configuration parameters
 
 4. Import BDKEnquiryBundle routing file (optional)
