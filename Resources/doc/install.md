@@ -48,13 +48,32 @@ Add the following configuration to your `config.yml` file according to which typ
 ``` yaml
 # app/config/config.yml
 bdk_enquiry:
- db_driver: orm # other valid value is 'mongodb'
- user_class: Acme\UserBundle\Entity\User
+    db_driver: orm # other valid value is 'mongodb'
+    user_class: Acme\UserBundle\Entity\User
 ```
 
 Only this two configuration values are required.
 See [Configuration Reference](https://github.com/Bodaclick/BDKEnquiryBundle/blob/dev/Resources/doc/configuration.md)
 for a list of all configuration parameters
+
+If you're not using auto mapping in your doctrine configuration, you must add the following to the doctrine section in
+your  `config.yml`:
+
+``` yaml
+# app/config/config.yml
+doctrine:
+    orm:
+        entity_managers:
+            default:
+                mappings:
+                    BDKEnquiryBundle: ~
+```
+
+Notes:
+- If you are using the short syntax for the ORM configuration, the mappings key is directly under `orm:`
+- If you are using several entity managers, take care to register the entities for the right ones.
+- The mapping for MongoDB is similar, but under the `doctrine_mongodb` section
+
 
 4. Import BDKEnquiryBundle routing file (optional)
 ---------------------------------------------------
